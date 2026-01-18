@@ -60,7 +60,7 @@ static QString detectDeviceType(HDEVINFO deviceInfoSet, SP_DEVINFO_DATA* deviceI
             deviceInfoData,
             SPDRP_CLASSGUID,
             nullptr,
-            (PBYTE)buffer,
+            reinterpret_cast<PBYTE>(buffer),
             sizeof(buffer),
             &requiredSize)) {
         QString classGuid = QString::fromWCharArray(buffer).toUpper();
@@ -76,7 +76,7 @@ static QString detectDeviceType(HDEVINFO deviceInfoSet, SP_DEVINFO_DATA* deviceI
                     deviceInfoData,
                     SPDRP_CLASS,
                     nullptr,
-                    (PBYTE)buffer,
+                    reinterpret_cast<PBYTE>(buffer),
                     sizeof(buffer),
                     &requiredSize)) {
                 QString deviceClass = QString::fromWCharArray(buffer).toUpper();
@@ -115,7 +115,7 @@ static QString detectDeviceType(HDEVINFO deviceInfoSet, SP_DEVINFO_DATA* deviceI
             deviceInfoData,
             SPDRP_CLASS,
             nullptr,
-            (PBYTE)buffer,
+            reinterpret_cast<PBYTE>(buffer),
             sizeof(buffer),
             &requiredSize)) {
         QString deviceClass = QString::fromWCharArray(buffer);
@@ -196,7 +196,7 @@ void MoD::enumerateUSBDevices()
                 &deviceInfoData,
                 SPDRP_HARDWAREID,
                 &dataType,
-                (PBYTE)buffer,
+                reinterpret_cast<PBYTE>(buffer),
                 sizeof(buffer),
                 &requiredSize)) {
             QString hardwareId = QString::fromWCharArray(buffer);
@@ -254,7 +254,7 @@ void MoD::enumerateUSBDevices()
                 &deviceInfoData,
                 SPDRP_DEVICEDESC,
                 &dataType,
-                (PBYTE)buffer,
+                reinterpret_cast<PBYTE>(buffer),
                 sizeof(buffer),
                 &requiredSize)) {
             QString description = QString::fromWCharArray(buffer);
@@ -282,7 +282,7 @@ void MoD::enumerateUSBDevices()
                 &deviceInfoData,
                 SPDRP_MFG,
                 &dataType,
-                (PBYTE)buffer,
+                reinterpret_cast<PBYTE>(buffer),
                 sizeof(buffer),
                 &requiredSize)) {
             info.manufacturer = QString::fromWCharArray(buffer);
