@@ -24,9 +24,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-# Link Windows setupapi library for USB device enumeration
-win32: LIBS += -lsetupapi
-
 SOURCES += \
         main.cpp \
         mod.cpp
