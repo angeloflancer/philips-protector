@@ -1,0 +1,50 @@
+using philips_protector_spy.Models;
+
+namespace philips_protector_spy
+{
+    /// <summary>
+    /// Validates license keys against current hardware fingerprint
+    /// </summary>
+    public class LicenseValidator
+    {
+        /// <summary>
+        /// Validates a license key against the current hardware
+        /// </summary>
+        /// <param name="licenseKey">The license key to validate</param>
+        /// <returns>True if the license key matches the current hardware, false otherwise</returns>
+        public static bool ValidateLicenseKey(string licenseKey)
+        {
+            if (string.IsNullOrWhiteSpace(licenseKey))
+                return false;
+
+            // Normalize the input: remove dashes and convert to uppercase
+            string normalizedKey = NormalizeLicenseKey(licenseKey);
+
+            // Get current hardware fingerprint
+            HardwareInfo currentHardware = HardwareFingerprint.GetHardwareInfo();
+
+            // Generate expected license key from current hardware
+            string expectedKey = LicenseGenerator.GenerateLicenseKey(currentHardware);
+            string normalizedExpected = NormalizeLicenseKey(expectedKey);
+
+            // Compare normalized keys
+            return normalizedKey == normalizedExpected;
+        }
+
+        /// <summary>
+        /// Normalizes a license key by removing dashes and converting to uppercase
+        /// </summary>
+        private static string NormalizeLicenseKey(string licenseKey)
+        {
+            return licenseKey.Replace("-", "").Replace(" ", "").ToUpperInvariant().Trim();
+        }
+
+        /// <summary>
+        /// Gets the current hardware fingerprint hash (for display purposes)
+        /// </summary>
+        public static string GetCurrentFingerprint()
+        {
+            return LicenseGenerator.GenerateLicenseKey();
+        }
+    }
+}
