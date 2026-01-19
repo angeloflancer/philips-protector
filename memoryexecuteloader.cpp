@@ -4,9 +4,11 @@
 #include <QCryptographicHash>
 #include <QProcess>
 #include <QDebug>
+#include <QTemporaryFile>
 #include <QDir>
 #include <QTime>
 #include <QThread>
+#include <QFileInfo>
 #include <cstring>
 
 // For Windows-specific functions
@@ -427,6 +429,10 @@ bool MemoryExecuteLoader::createSelfDecryptingLoader(const QString &encryptedFil
                                                      const QString &loaderOutputPath,
                                                      const QString &password)
 {
+    Q_UNUSED(encryptedFilePath);
+    Q_UNUSED(loaderOutputPath);
+    Q_UNUSED(password);
+    
     qDebug() << "=== CREATING SELF-DECRYPTING LOADER ===";
     qDebug() << "This feature requires a separate loader executable template";
     qDebug() << "For now, use decryptAndExecuteFromMemory() instead";

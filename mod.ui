@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>750</width>
-    <height>550</height>
+    <height>750</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -224,6 +224,111 @@
      </widget>
     </item>
     <item>
+     <widget class="QGroupBox" name="memoryExecGroup">
+      <property name="title">
+       <string>Memory Execution (No Disk Decryption)</string>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <layout class="QVBoxLayout" name="memoryExecLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="labelMemoryExecDescription">
+         <property name="text">
+          <string>Encrypt with hardware key and run directly from memory (no decrypted file on disk):</string>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="memoryEncryptFileLayout">
+         <item>
+          <widget class="QLineEdit" name="memoryEncryptFileLineEdit">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="placeholderText">
+            <string>No file selected...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="browseMemoryEncryptButton">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
+           <property name="minimumWidth">
+            <number>80</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="memoryEncryptButton">
+         <property name="text">
+          <string>Encrypt with Hardware Key (Memory Mode)</string>
+         </property>
+         <property name="minimumHeight">
+          <number>35</number>
+         </property>
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="memoryRunFileLayout">
+         <item>
+          <widget class="QLineEdit" name="memoryRunFileLineEdit">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="placeholderText">
+            <string>No encrypted file selected...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="browseMemoryRunButton">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
+           <property name="minimumWidth">
+            <number>80</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="memoryRunButton">
+         <property name="text">
+          <string>Run from Memory (No Decrypt to Disk)</string>
+         </property>
+         <property name="minimumHeight">
+          <number>35</number>
+         </property>
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
      <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -272,6 +377,30 @@
    <signal>clicked()</signal>
    <receiver>MoD</receiver>
    <slot>onRunButtonClicked()</slot>
+  </connection>
+  <connection>
+   <sender>browseMemoryEncryptButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MoD</receiver>
+   <slot>onBrowseMemoryEncryptButtonClicked()</slot>
+  </connection>
+  <connection>
+   <sender>memoryEncryptButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MoD</receiver>
+   <slot>onMemoryEncryptButtonClicked()</slot>
+  </connection>
+  <connection>
+   <sender>browseMemoryRunButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MoD</receiver>
+   <slot>onBrowseMemoryRunButtonClicked()</slot>
+  </connection>
+  <connection>
+   <sender>memoryRunButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MoD</receiver>
+   <slot>onMemoryRunButtonClicked()</slot>
   </connection>
  </connections>
 </ui>

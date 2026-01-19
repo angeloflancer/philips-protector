@@ -25,7 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 # Link Windows CryptoAPI library for executable encryption
-win32: LIBS += -ladvapi32
+win32: LIBS += -ladvapi32 -lpsapi
 
 SOURCES += \
         main.cpp \

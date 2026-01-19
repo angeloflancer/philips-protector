@@ -49,6 +49,17 @@ public:
     QLineEdit *runFileLineEdit;
     QPushButton *browseRunButton;
     QPushButton *runButton;
+    QGroupBox *memoryExecGroup;
+    QVBoxLayout *memoryExecLayout;
+    QLabel *labelMemoryExecDescription;
+    QHBoxLayout *memoryEncryptFileLayout;
+    QLineEdit *memoryEncryptFileLineEdit;
+    QPushButton *browseMemoryEncryptButton;
+    QPushButton *memoryEncryptButton;
+    QHBoxLayout *memoryRunFileLayout;
+    QLineEdit *memoryRunFileLineEdit;
+    QPushButton *browseMemoryRunButton;
+    QPushButton *memoryRunButton;
     QSpacerItem *verticalSpacer;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
@@ -57,7 +68,7 @@ public:
     {
         if (MoD->objectName().isEmpty())
             MoD->setObjectName(QStringLiteral("MoD"));
-        MoD->resize(750, 550);
+        MoD->resize(750, 750);
         centralWidget = new QWidget(MoD);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         mainVerticalLayout = new QVBoxLayout(centralWidget);
@@ -174,6 +185,66 @@ public:
 
         mainVerticalLayout->addWidget(runGroup);
 
+        memoryExecGroup = new QGroupBox(centralWidget);
+        memoryExecGroup->setObjectName(QStringLiteral("memoryExecGroup"));
+        memoryExecGroup->setFont(font);
+        memoryExecLayout = new QVBoxLayout(memoryExecGroup);
+        memoryExecLayout->setSpacing(10);
+        memoryExecLayout->setObjectName(QStringLiteral("memoryExecLayout"));
+        labelMemoryExecDescription = new QLabel(memoryExecGroup);
+        labelMemoryExecDescription->setObjectName(QStringLiteral("labelMemoryExecDescription"));
+        labelMemoryExecDescription->setFont(font1);
+
+        memoryExecLayout->addWidget(labelMemoryExecDescription);
+
+        memoryEncryptFileLayout = new QHBoxLayout();
+        memoryEncryptFileLayout->setObjectName(QStringLiteral("memoryEncryptFileLayout"));
+        memoryEncryptFileLineEdit = new QLineEdit(memoryExecGroup);
+        memoryEncryptFileLineEdit->setObjectName(QStringLiteral("memoryEncryptFileLineEdit"));
+        memoryEncryptFileLineEdit->setReadOnly(true);
+
+        memoryEncryptFileLayout->addWidget(memoryEncryptFileLineEdit);
+
+        browseMemoryEncryptButton = new QPushButton(memoryExecGroup);
+        browseMemoryEncryptButton->setObjectName(QStringLiteral("browseMemoryEncryptButton"));
+        browseMemoryEncryptButton->setMinimumWidth(80);
+
+        memoryEncryptFileLayout->addWidget(browseMemoryEncryptButton);
+
+        memoryExecLayout->addLayout(memoryEncryptFileLayout);
+
+        memoryEncryptButton = new QPushButton(memoryExecGroup);
+        memoryEncryptButton->setObjectName(QStringLiteral("memoryEncryptButton"));
+        memoryEncryptButton->setMinimumHeight(35);
+        memoryEncryptButton->setEnabled(false);
+
+        memoryExecLayout->addWidget(memoryEncryptButton);
+
+        memoryRunFileLayout = new QHBoxLayout();
+        memoryRunFileLayout->setObjectName(QStringLiteral("memoryRunFileLayout"));
+        memoryRunFileLineEdit = new QLineEdit(memoryExecGroup);
+        memoryRunFileLineEdit->setObjectName(QStringLiteral("memoryRunFileLineEdit"));
+        memoryRunFileLineEdit->setReadOnly(true);
+
+        memoryRunFileLayout->addWidget(memoryRunFileLineEdit);
+
+        browseMemoryRunButton = new QPushButton(memoryExecGroup);
+        browseMemoryRunButton->setObjectName(QStringLiteral("browseMemoryRunButton"));
+        browseMemoryRunButton->setMinimumWidth(80);
+
+        memoryRunFileLayout->addWidget(browseMemoryRunButton);
+
+        memoryExecLayout->addLayout(memoryRunFileLayout);
+
+        memoryRunButton = new QPushButton(memoryExecGroup);
+        memoryRunButton->setObjectName(QStringLiteral("memoryRunButton"));
+        memoryRunButton->setMinimumHeight(35);
+        memoryRunButton->setEnabled(false);
+
+        memoryExecLayout->addWidget(memoryRunButton);
+
+        mainVerticalLayout->addWidget(memoryExecGroup);
+
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         mainVerticalLayout->addItem(verticalSpacer);
@@ -192,6 +263,10 @@ public:
         QObject::connect(encryptButton, SIGNAL(clicked()), MoD, SLOT(onEncryptButtonClicked()));
         QObject::connect(browseRunButton, SIGNAL(clicked()), MoD, SLOT(onBrowseRunButtonClicked()));
         QObject::connect(runButton, SIGNAL(clicked()), MoD, SLOT(onRunButtonClicked()));
+        QObject::connect(browseMemoryEncryptButton, SIGNAL(clicked()), MoD, SLOT(onBrowseMemoryEncryptButtonClicked()));
+        QObject::connect(memoryEncryptButton, SIGNAL(clicked()), MoD, SLOT(onMemoryEncryptButtonClicked()));
+        QObject::connect(browseMemoryRunButton, SIGNAL(clicked()), MoD, SLOT(onBrowseMemoryRunButtonClicked()));
+        QObject::connect(memoryRunButton, SIGNAL(clicked()), MoD, SLOT(onMemoryRunButtonClicked()));
 
         QMetaObject::connectSlotsByName(MoD);
     } // setupUi
@@ -213,6 +288,14 @@ public:
         runFileLineEdit->setPlaceholderText(QApplication::translate("MoD", "No file selected...", nullptr));
         browseRunButton->setText(QApplication::translate("MoD", "Browse...", nullptr));
         runButton->setText(QApplication::translate("MoD", "Run Encrypted Executable", nullptr));
+        memoryExecGroup->setTitle(QApplication::translate("MoD", "Memory Execution (No Disk Decryption)", nullptr));
+        labelMemoryExecDescription->setText(QApplication::translate("MoD", "Encrypt with hardware key and run directly from memory (no decrypted file on disk):", nullptr));
+        memoryEncryptFileLineEdit->setPlaceholderText(QApplication::translate("MoD", "No file selected...", nullptr));
+        browseMemoryEncryptButton->setText(QApplication::translate("MoD", "Browse...", nullptr));
+        memoryEncryptButton->setText(QApplication::translate("MoD", "Encrypt with Hardware Key (Memory Mode)", nullptr));
+        memoryRunFileLineEdit->setPlaceholderText(QApplication::translate("MoD", "No encrypted file selected...", nullptr));
+        browseMemoryRunButton->setText(QApplication::translate("MoD", "Browse...", nullptr));
+        memoryRunButton->setText(QApplication::translate("MoD", "Run from Memory (No Decrypt to Disk)", nullptr));
     } // retranslateUi
 
 };
