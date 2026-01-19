@@ -24,10 +24,22 @@ public:
 
 private slots:
     /**
-     * @brief Slot to handle generate button click event
+     * @brief Slot to handle hardware key generation button click event
      * Generates hardware key and displays it in the UI
      */
-    void onGenerateButtonClicked();
+    void onGenerateHardwareKeyButtonClicked();
+    
+    /**
+     * @brief Slot to handle browse button click event
+     * Opens file dialog to select executable file
+     */
+    void onBrowseButtonClicked();
+
+    /**
+     * @brief Slot to handle patch executable button click event
+     * Patches the selected executable to show Hello on startup
+     */
+    void onPatchExecutableButtonClicked();
 
 private:
     Ui::MoD *ui;
