@@ -17,14 +17,26 @@ namespace philips_protector
             if (string.IsNullOrWhiteSpace(licenseKey))
                 return false;
 
+            // Normalize the input: remove dashes and convert to uppercase
+            string normalizedKey = NormalizeLicenseKey(licenseKey);
+
             // Get current hardware fingerprint
             HardwareInfo currentHardware = HardwareFingerprint.GetHardwareInfo();
 
             // Generate expected license key from current hardware
             string expectedKey = LicenseGenerator.GenerateLicenseKey(currentHardware);
+            string normalizedExpected = NormalizeLicenseKey(expectedKey);
 
-            // Compare (case-sensitive)
-            return licenseKey.Trim() == expectedKey.Trim();
+            // Compare normalized keys
+            return normalizedKey == normalizedExpected;
+        }
+
+        /// <summary>
+        /// Normalizes a license key by removing dashes and converting to uppercase
+        /// </summary>
+        private static string NormalizeLicenseKey(string licenseKey)
+        {
+            return licenseKey.Replace("-", "").Replace(" ", "").ToUpperInvariant().Trim();
         }
 
         /// <summary>

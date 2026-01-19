@@ -31,11 +31,15 @@
                          Padding="8"
                          MinHeight="60"
                          VerticalScrollBarVisibility="Auto"/>
-                <Button x:Name="CopyFingerprintButton" Content="Copy Fingerprint" 
-                        Click="CopyFingerprintButton_Click"
-                        Margin="0,10,0,0" 
-                        HorizontalAlignment="Left"
-                        Padding="10,5"/>
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <Button x:Name="CopyFingerprintButton" Content="Copy Fingerprint" 
+                            Click="CopyFingerprintButton_Click"
+                            Padding="10,5"
+                            Margin="0,0,10,0"/>
+                    <Button x:Name="SaveLicenseKeyButton" Content="Save License Key" 
+                            Click="SaveLicenseKeyButton_Click"
+                            Padding="10,5"/>
+                </StackPanel>
             </StackPanel>
         </GroupBox>
 

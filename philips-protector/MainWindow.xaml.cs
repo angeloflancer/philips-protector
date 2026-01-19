@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 using philips_protector.Models;
 
 namespace philips_protector
@@ -165,6 +166,41 @@ namespace philips_protector
             catch (Exception ex)
             {
                 MessageBox.Show($"Error copying to clipboard: {ex.Message}", 
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SaveLicenseKeyButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(FingerprintTextBox.Text))
+                {
+                    MessageBox.Show("No license key to save. Please ensure hardware fingerprint is loaded.", 
+                        "No License Key", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "License Key Files (*.lic)|*.lic|Text Files (*.txt)|*.txt|All Files (*.*)|*.*",
+                    Title = "Save License Key",
+                    FileName = "license_key.lic",
+                    DefaultExt = "lic"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    string licenseKey = FingerprintTextBox.Text;
+                    System.IO.File.WriteAllText(saveFileDialog.FileName, licenseKey, Encoding.UTF8);
+                    
+                    MessageBox.Show($"License key saved successfully!\n\nLocation: {saveFileDialog.FileName}", 
+                        "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving license key: {ex.Message}", 
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
