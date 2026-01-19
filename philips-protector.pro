@@ -26,10 +26,12 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mod.cpp
+        mod.cpp \
+        hardwarefingerprint.cpp
 
 HEADERS += \
-        mod.h
+        mod.h \
+        hardwarefingerprint.h
 
 FORMS += \
         mod.ui

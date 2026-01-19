@@ -209,6 +209,7 @@ release/moc_mod.cpp: ../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QMain
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qtouchdevice.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qtabwidget.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qicon.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/QString \
 		mod.h \
 		release/moc_predefs.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/bin/moc.exe
@@ -344,6 +345,7 @@ release/main.o: main.cpp mod.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qtouchdevice.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qtabwidget.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qicon.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/QString \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QApplication \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qapplication.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/qcoreapplication.h \
@@ -460,6 +462,7 @@ release/mod.o: mod.cpp mod.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qtouchdevice.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qtabwidget.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qicon.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/QString \
 		ui_mod.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/QVariant \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QApplication \
@@ -469,23 +472,15 @@ release/mod.o: mod.cpp mod.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qdesktopwidget.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qguiapplication.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qinputmethod.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QHeaderView \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qheaderview.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qabstractitemview.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qabstractscrollarea.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QLabel \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qlabel.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qframe.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/qabstractitemmodel.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/qitemselectionmodel.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qabstractitemdelegate.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qstyleoption.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qabstractspinbox.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qvalidator.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/qregularexpression.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qslider.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qabstractslider.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qstyle.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qtabbar.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qrubberband.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QLineEdit \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qlineedit.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qtextcursor.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qtextformat.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qpen.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtGui/qtextoption.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QMenuBar \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qmenubar.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qmenu.h \
@@ -496,15 +491,19 @@ release/mod.o: mod.cpp mod.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qabstractbutton.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QStatusBar \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qstatusbar.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QTableWidget \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qtablewidget.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qtableview.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QToolBar \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qtoolbar.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QVBoxLayout \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qboxlayout.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qlayout.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qlayoutitem.h \
 		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/qgridlayout.h \
-		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QWidget
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtWidgets/QWidget \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/QProcess \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/qprocess.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/QCryptographicHash \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/qcryptographichash.h \
+		../../Qt/Qt5.11.3/5.11.3/mingw53_32/include/QtCore/QDebug
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\mod.o mod.cpp
 
 release/moc_mod.o: release/moc_mod.cpp 
