@@ -30,19 +30,11 @@ win32: LIBS += -ladvapi32 -lpsapi
 SOURCES += \
         main.cpp \
         mod.cpp \
-        hardwarefingerprint.cpp \
-        executableencryptor.cpp \
-        memoryexecuteloader.cpp \
-        runtimeprotector.cpp \
-        executableembedder.cpp
+        hardwarefingerprint.cpp
 
 HEADERS += \
         mod.h \
-        hardwarefingerprint.h \
-        executableencryptor.h \
-        memoryexecuteloader.h \
-        runtimeprotector.h \
-        executableembedder.h
+        hardwarefingerprint.h
 
 FORMS += \
         mod.ui

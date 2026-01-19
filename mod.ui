@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>750</width>
-    <height>400</height>
+    <height>200</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -88,125 +88,6 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="embedExecGroup">
-      <property name="title">
-       <string>Create Embedded Executable</string>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <layout class="QVBoxLayout" name="embedExecLayout">
-       <property name="spacing">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="labelEmbedDescription">
-         <property name="text">
-          <string>Embed an executable file with hardware key protection. The created file will check hardware key before running:</string>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-          </font>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="embedOriginalFileLayout">
-         <item>
-          <widget class="QLabel" name="labelOriginalFile">
-           <property name="text">
-            <string>Original Executable:</string>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="embedOriginalFileLineEdit">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="placeholderText">
-            <string>No file selected...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="browseEmbedOriginalButton">
-           <property name="text">
-            <string>Browse...</string>
-           </property>
-           <property name="minimumWidth">
-            <number>80</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="embedOutputFileLayout">
-         <item>
-          <widget class="QLabel" name="labelOutputFile">
-           <property name="text">
-            <string>Output Executable:</string>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="embedOutputFileLineEdit">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="placeholderText">
-            <string>No file selected...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="browseEmbedOutputButton">
-           <property name="text">
-            <string>Browse...</string>
-           </property>
-           <property name="minimumWidth">
-            <number>80</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QPushButton" name="createEmbeddedButton">
-         <property name="text">
-          <string>Create Embedded Executable</string>
-         </property>
-         <property name="minimumHeight">
-          <number>35</number>
-         </property>
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
      <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -233,22 +114,10 @@
    <slot>onGenerateButtonClicked()</slot>
   </connection>
   <connection>
-   <sender>browseEmbedOriginalButton</sender>
+   <sender>generateButton</sender>
    <signal>clicked()</signal>
    <receiver>MoD</receiver>
-   <slot>onBrowseEmbedOriginalButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>browseEmbedOutputButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onBrowseEmbedOutputButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>createEmbeddedButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onCreateEmbeddedButtonClicked()</slot>
+   <slot>onGenerateButtonClicked()</slot>
   </connection>
  </connections>
 </ui>
