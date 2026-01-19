@@ -6,57 +6,241 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>200</height>
+    <width>750</width>
+    <height>550</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Philips Protector</string>
   </property>
-  <property name="autoFillBackground">
-   <bool>false</bool>
-  </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="mainVerticalLayout">
+    <property name="spacing">
+     <number>15</number>
+    </property>
+    <property name="leftMargin">
+     <number>20</number>
+    </property>
+    <property name="topMargin">
+     <number>20</number>
+    </property>
+    <property name="rightMargin">
+     <number>20</number>
+    </property>
+    <property name="bottomMargin">
+     <number>20</number>
+    </property>
     <item>
-     <widget class="QLabel" name="labelTitle">
+     <widget class="QGroupBox" name="hardwareKeyGroup">
+      <property name="title">
+       <string>Hardware Fingerprint</string>
+      </property>
       <property name="font">
        <font>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
-      <property name="text">
-       <string>Hardware Fingerprint Key</string>
-      </property>
+      <layout class="QVBoxLayout" name="hardwareKeyLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="labelKeyDescription">
+         <property name="text">
+          <string>Unique hardware identifier for this machine:</string>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="keyLineEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="placeholderText">
+          <string>Hardware fingerprint will appear here...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="generateButton">
+         <property name="text">
+          <string>Generate Hardware Key</string>
+         </property>
+         <property name="minimumHeight">
+          <number>35</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
-     <widget class="QLineEdit" name="keyLineEdit">
+     <widget class="QGroupBox" name="encryptGroup">
+      <property name="title">
+       <string>Encrypt Executable</string>
+      </property>
       <property name="font">
        <font>
-        <family>Consolas</family>
-        <pointsize>9</pointsize>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
        </font>
       </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
+      <layout class="QVBoxLayout" name="encryptLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="labelEncryptDescription">
+         <property name="text">
+          <string>Select an executable file to encrypt with hardware key:</string>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="encryptFileLayout">
+         <item>
+          <widget class="QLineEdit" name="encryptFileLineEdit">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="placeholderText">
+            <string>No file selected...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="browseEncryptButton">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
+           <property name="minimumWidth">
+            <number>80</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="encryptButton">
+         <property name="text">
+          <string>Encrypt Executable</string>
+         </property>
+         <property name="minimumHeight">
+          <number>35</number>
+         </property>
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="generateButton">
-      <property name="text">
-       <string>Generate Hardware Key</string>
+     <widget class="QGroupBox" name="runGroup">
+      <property name="title">
+       <string>Run Encrypted Executable</string>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <layout class="QVBoxLayout" name="runLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="labelRunDescription">
+         <property name="text">
+          <string>Select an encrypted executable file to decrypt and run:</string>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="runFileLayout">
+         <item>
+          <widget class="QLineEdit" name="runFileLineEdit">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="placeholderText">
+            <string>No file selected...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="browseRunButton">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
+           <property name="minimumWidth">
+            <number>80</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="runButton">
+         <property name="text">
+          <string>Run Encrypted Executable</string>
+         </property>
+         <property name="minimumHeight">
+          <number>35</number>
+         </property>
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar"/>
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
- <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections>
   <connection>
@@ -64,16 +248,30 @@
    <signal>clicked()</signal>
    <receiver>MoD</receiver>
    <slot>onGenerateButtonClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
+  </connection>
+  <connection>
+   <sender>browseEncryptButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MoD</receiver>
+   <slot>onBrowseEncryptButtonClicked()</slot>
+  </connection>
+  <connection>
+   <sender>encryptButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MoD</receiver>
+   <slot>onEncryptButtonClicked()</slot>
+  </connection>
+  <connection>
+   <sender>browseRunButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MoD</receiver>
+   <slot>onBrowseRunButtonClicked()</slot>
+  </connection>
+  <connection>
+   <sender>runButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MoD</receiver>
+   <slot>onRunButtonClicked()</slot>
   </connection>
  </connections>
 </ui>

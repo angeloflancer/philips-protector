@@ -28,9 +28,43 @@ private slots:
      * Generates hardware key and displays it in the UI
      */
     void onGenerateButtonClicked();
+    
+    /**
+     * @brief Slot to handle browse button for encryption
+     * Opens file dialog to select executable file to encrypt
+     */
+    void onBrowseEncryptButtonClicked();
+    
+    /**
+     * @brief Slot to handle encrypt button click
+     * Encrypts the selected executable file with hardware key
+     */
+    void onEncryptButtonClicked();
+    
+    /**
+     * @brief Slot to handle browse button for running
+     * Opens file dialog to select encrypted executable file
+     */
+    void onBrowseRunButtonClicked();
+    
+    /**
+     * @brief Slot to handle run button click
+     * Decrypts and runs the selected encrypted executable
+     */
+    void onRunButtonClicked();
 
 private:
     Ui::MoD *ui;
+    
+    /**
+     * @brief Update encrypt button enabled state based on file selection
+     */
+    void updateEncryptButtonState();
+    
+    /**
+     * @brief Update run button enabled state based on file selection
+     */
+    void updateRunButtonState();
 };
 
 #endif // MOD_H
