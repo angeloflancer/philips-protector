@@ -69,7 +69,11 @@ void MoD::onEncryptButtonClicked()
     }
     
     // Get hardware key
+    qDebug() << "[ENCRYPT] Generating hardware key...";
     QString hardwareKey = HardwareFingerprint::generateHardwareKey();
+    qDebug() << "[ENCRYPT] Hardware key:" << hardwareKey;
+    qDebug() << "[ENCRYPT] Hardware key length:" << hardwareKey.length();
+    
     if (hardwareKey.isEmpty()) {
         QMessageBox::critical(this, tr("Error"), tr("Failed to generate hardware key. Cannot encrypt file."));
         return;
@@ -133,7 +137,16 @@ void MoD::onRunButtonClicked()
     }
     
     // Verify hardware key first
+    qDebug() << "[DECRYPT] Generating hardware key...";
     QString hardwareKey = HardwareFingerprint::generateHardwareKey();
+    qDebug() << "[DECRYPT] Hardware key:" << hardwareKey;
+    qDebug() << "[DECRYPT] Hardware key length:" << hardwareKey.length();
+    
+    // Verify key consistency by generating again
+    QString hardwareKey2 = HardwareFingerprint::generateHardwareKey();
+    qDebug() << "[DECRYPT] Hardware key (2nd generation):" << hardwareKey2;
+    qDebug() << "[DECRYPT] Keys match:" << (hardwareKey == hardwareKey2 ? "YES" : "NO");
+    
     if (hardwareKey.isEmpty()) {
         QMessageBox::critical(this, tr("Error"), tr("Failed to generate hardware key. Cannot decrypt file."));
         return;

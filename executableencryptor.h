@@ -108,18 +108,18 @@ private:
     /**
      * @brief Simple XOR encryption (fallback method, less secure but faster)
      * @param data Data to encrypt
-     * @param key Encryption key
+     * @param key Encryption key (QByteArray, can be derived key)
      * @return Encrypted data
      */
-    static QByteArray xorEncrypt(const QByteArray &data, const QString &key);
+    static QByteArray xorEncrypt(const QByteArray &data, const QByteArray &key);
 
     /**
      * @brief Simple XOR decryption (fallback method)
      * @param encryptedData Encrypted data
-     * @param key Decryption key (must match encryption key)
+     * @param key Decryption key (QByteArray, must match encryption key)
      * @return Decrypted data
      */
-    static QByteArray xorDecrypt(const QByteArray &encryptedData, const QString &key);
+    static QByteArray xorDecrypt(const QByteArray &encryptedData, const QByteArray &key);
 };
 
 #endif // EXECUTABLEENCRYPTOR_H
