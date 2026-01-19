@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("philips-protector")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+65983196998b8e4404073fee1cb735c9480407f7")]
 [assembly: System.Reflection.AssemblyProductAttribute("philips-protector")]
 [assembly: System.Reflection.AssemblyTitleAttribute("philips-protector")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
