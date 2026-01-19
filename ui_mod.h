@@ -12,7 +12,6 @@
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGroupBox>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
@@ -35,13 +34,6 @@ public:
     QLabel *labelKeyDescription;
     QLineEdit *keyLineEdit;
     QPushButton *generateHardwareKeyButton;
-    QGroupBox *executableGroup;
-    QVBoxLayout *executableLayout;
-    QLabel *labelExecutableDescription;
-    QHBoxLayout *fileSelectionLayout;
-    QLineEdit *filePathLineEdit;
-    QPushButton *browseButton;
-    QPushButton *patchExecutableButton;
     QSpacerItem *verticalSpacer;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
@@ -50,7 +42,7 @@ public:
     {
         if (MoD->objectName().isEmpty())
             MoD->setObjectName(QStringLiteral("MoD"));
-        MoD->resize(750, 320);
+        MoD->resize(750, 200);
         centralWidget = new QWidget(MoD);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         mainVerticalLayout = new QVBoxLayout(centralWidget);
@@ -94,44 +86,6 @@ public:
 
         mainVerticalLayout->addWidget(hardwareKeyGroup);
 
-        executableGroup = new QGroupBox(centralWidget);
-        executableGroup->setObjectName(QStringLiteral("executableGroup"));
-        executableGroup->setFont(font);
-        executableLayout = new QVBoxLayout(executableGroup);
-        executableLayout->setSpacing(10);
-        executableLayout->setObjectName(QStringLiteral("executableLayout"));
-        labelExecutableDescription = new QLabel(executableGroup);
-        labelExecutableDescription->setObjectName(QStringLiteral("labelExecutableDescription"));
-        labelExecutableDescription->setFont(font1);
-
-        executableLayout->addWidget(labelExecutableDescription);
-
-        fileSelectionLayout = new QHBoxLayout();
-        fileSelectionLayout->setObjectName(QStringLiteral("fileSelectionLayout"));
-        filePathLineEdit = new QLineEdit(executableGroup);
-        filePathLineEdit->setObjectName(QStringLiteral("filePathLineEdit"));
-        filePathLineEdit->setReadOnly(true);
-
-        fileSelectionLayout->addWidget(filePathLineEdit);
-
-        browseButton = new QPushButton(executableGroup);
-        browseButton->setObjectName(QStringLiteral("browseButton"));
-        browseButton->setMinimumWidth(80);
-
-        fileSelectionLayout->addWidget(browseButton);
-
-
-        executableLayout->addLayout(fileSelectionLayout);
-
-        patchExecutableButton = new QPushButton(executableGroup);
-        patchExecutableButton->setObjectName(QStringLiteral("patchExecutableButton"));
-        patchExecutableButton->setMinimumHeight(35);
-
-        executableLayout->addWidget(patchExecutableButton);
-
-
-        mainVerticalLayout->addWidget(executableGroup);
-
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         mainVerticalLayout->addItem(verticalSpacer);
@@ -146,8 +100,6 @@ public:
 
         retranslateUi(MoD);
         QObject::connect(generateHardwareKeyButton, SIGNAL(clicked()), MoD, SLOT(onGenerateHardwareKeyButtonClicked()));
-        QObject::connect(browseButton, SIGNAL(clicked()), MoD, SLOT(onBrowseButtonClicked()));
-        QObject::connect(patchExecutableButton, SIGNAL(clicked()), MoD, SLOT(onPatchExecutableButtonClicked()));
 
         QMetaObject::connectSlotsByName(MoD);
     } // setupUi
@@ -159,11 +111,6 @@ public:
         labelKeyDescription->setText(QApplication::translate("MoD", "Unique hardware identifier for this machine:", nullptr));
         keyLineEdit->setPlaceholderText(QApplication::translate("MoD", "Hardware fingerprint will appear here...", nullptr));
         generateHardwareKeyButton->setText(QApplication::translate("MoD", "Generate Hardware Key", nullptr));
-        executableGroup->setTitle(QApplication::translate("MoD", "Executable Patch", nullptr));
-        labelExecutableDescription->setText(QApplication::translate("MoD", "Select executable to patch with a startup Hello message:", nullptr));
-        filePathLineEdit->setPlaceholderText(QApplication::translate("MoD", "No file selected...", nullptr));
-        browseButton->setText(QApplication::translate("MoD", "Browse...", nullptr));
-        patchExecutableButton->setText(QApplication::translate("MoD", "Patch Executable with Hello", nullptr));
     } // retranslateUi
 
 };

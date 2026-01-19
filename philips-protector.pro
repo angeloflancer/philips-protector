@@ -30,13 +30,11 @@ win32: LIBS += -ladvapi32 -lpsapi
 SOURCES += \
         main.cpp \
         mod.cpp \
-        hardwarefingerprint.cpp \
-        pepatcher.cpp
+        hardwarefingerprint.cpp
 
 HEADERS += \
         mod.h \
-        hardwarefingerprint.h \
-        pepatcher.h
+        hardwarefingerprint.h
 
 FORMS += \
         mod.ui
