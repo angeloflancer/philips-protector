@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>750</width>
-    <height>950</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -88,9 +88,9 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="encryptGroup">
+     <widget class="QGroupBox" name="embedExecGroup">
       <property name="title">
-       <string>Encrypt Executable</string>
+       <string>Create Embedded Executable</string>
       </property>
       <property name="font">
        <font>
@@ -99,255 +99,14 @@
         <bold>true</bold>
        </font>
       </property>
-      <layout class="QVBoxLayout" name="encryptLayout">
+      <layout class="QVBoxLayout" name="embedExecLayout">
        <property name="spacing">
         <number>10</number>
        </property>
        <item>
-        <widget class="QLabel" name="labelEncryptDescription">
+        <widget class="QLabel" name="labelEmbedDescription">
          <property name="text">
-          <string>Select an executable file to encrypt with hardware key:</string>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-          </font>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="encryptFileLayout">
-         <item>
-          <widget class="QLineEdit" name="encryptFileLineEdit">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="placeholderText">
-            <string>No file selected...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="browseEncryptButton">
-           <property name="text">
-            <string>Browse...</string>
-           </property>
-           <property name="minimumWidth">
-            <number>80</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QPushButton" name="encryptButton">
-         <property name="text">
-          <string>Encrypt Executable</string>
-         </property>
-         <property name="minimumHeight">
-          <number>35</number>
-         </property>
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="runGroup">
-      <property name="title">
-       <string>Run Encrypted Executable</string>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <layout class="QVBoxLayout" name="runLayout">
-       <property name="spacing">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="labelRunDescription">
-         <property name="text">
-          <string>Select an encrypted executable file to decrypt and run:</string>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-          </font>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="runFileLayout">
-         <item>
-          <widget class="QLineEdit" name="runFileLineEdit">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="placeholderText">
-            <string>No file selected...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="browseRunButton">
-           <property name="text">
-            <string>Browse...</string>
-           </property>
-           <property name="minimumWidth">
-            <number>80</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QPushButton" name="runButton">
-         <property name="text">
-          <string>Run Encrypted Executable</string>
-         </property>
-         <property name="minimumHeight">
-          <number>35</number>
-         </property>
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="memoryExecGroup">
-      <property name="title">
-       <string>Memory Execution (No Disk Decryption)</string>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <layout class="QVBoxLayout" name="memoryExecLayout">
-       <property name="spacing">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="labelMemoryExecDescription">
-         <property name="text">
-          <string>Encrypt with hardware key and run directly from memory (no decrypted file on disk):</string>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-          </font>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="memoryEncryptFileLayout">
-         <item>
-          <widget class="QLineEdit" name="memoryEncryptFileLineEdit">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="placeholderText">
-            <string>No file selected...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="browseMemoryEncryptButton">
-           <property name="text">
-            <string>Browse...</string>
-           </property>
-           <property name="minimumWidth">
-            <number>80</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QPushButton" name="memoryEncryptButton">
-         <property name="text">
-          <string>Encrypt with Hardware Key (Memory Mode)</string>
-         </property>
-         <property name="minimumHeight">
-          <number>35</number>
-         </property>
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="memoryRunFileLayout">
-         <item>
-          <widget class="QLineEdit" name="memoryRunFileLineEdit">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="placeholderText">
-            <string>No encrypted file selected...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="browseMemoryRunButton">
-           <property name="text">
-            <string>Browse...</string>
-           </property>
-           <property name="minimumWidth">
-            <number>80</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QPushButton" name="memoryRunButton">
-         <property name="text">
-          <string>Run from Memory (No Decrypt to Disk)</string>
-         </property>
-         <property name="minimumHeight">
-          <number>35</number>
-         </property>
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="runtimeProtectGroup">
-      <property name="title">
-       <string>Runtime Protection (Hardware-Bound + Anti-Debugging)</string>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <layout class="QVBoxLayout" name="runtimeProtectLayout">
-       <property name="spacing">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="labelRuntimeProtectDescription">
-         <property name="text">
-          <string>Advanced protection: Embeds hardware fingerprint, verifies at runtime, and includes anti-debugging. Even if decrypted, won't run on other machines:</string>
+          <string>Embed an executable file with hardware key protection. The created file will check hardware key before running:</string>
          </property>
          <property name="font">
           <font>
@@ -360,9 +119,21 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="runtimeProtectEncryptFileLayout">
+        <layout class="QHBoxLayout" name="embedOriginalFileLayout">
          <item>
-          <widget class="QLineEdit" name="runtimeProtectEncryptFileLineEdit">
+          <widget class="QLabel" name="labelOriginalFile">
+           <property name="text">
+            <string>Original Executable:</string>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="embedOriginalFileLineEdit">
            <property name="readOnly">
             <bool>true</bool>
            </property>
@@ -372,7 +143,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="browseRuntimeProtectEncryptButton">
+          <widget class="QPushButton" name="browseEmbedOriginalButton">
            <property name="text">
             <string>Browse...</string>
            </property>
@@ -384,32 +155,31 @@
         </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="runtimeProtectEncryptButton">
-         <property name="text">
-          <string>Encrypt with Runtime Protection</string>
-         </property>
-         <property name="minimumHeight">
-          <number>35</number>
-         </property>
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="runtimeProtectRunFileLayout">
+        <layout class="QHBoxLayout" name="embedOutputFileLayout">
          <item>
-          <widget class="QLineEdit" name="runtimeProtectRunFileLineEdit">
+          <widget class="QLabel" name="labelOutputFile">
+           <property name="text">
+            <string>Output Executable:</string>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="embedOutputFileLineEdit">
            <property name="readOnly">
             <bool>true</bool>
            </property>
            <property name="placeholderText">
-            <string>No protected file selected...</string>
+            <string>No file selected...</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="browseRuntimeProtectRunButton">
+          <widget class="QPushButton" name="browseEmbedOutputButton">
            <property name="text">
             <string>Browse...</string>
            </property>
@@ -421,9 +191,9 @@
         </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="runtimeProtectRunButton">
+        <widget class="QPushButton" name="createEmbeddedButton">
          <property name="text">
-          <string>Run Protected Executable</string>
+          <string>Create Embedded Executable</string>
          </property>
          <property name="minimumHeight">
           <number>35</number>
@@ -463,76 +233,22 @@
    <slot>onGenerateButtonClicked()</slot>
   </connection>
   <connection>
-   <sender>browseEncryptButton</sender>
+   <sender>browseEmbedOriginalButton</sender>
    <signal>clicked()</signal>
    <receiver>MoD</receiver>
-   <slot>onBrowseEncryptButtonClicked()</slot>
+   <slot>onBrowseEmbedOriginalButtonClicked()</slot>
   </connection>
   <connection>
-   <sender>encryptButton</sender>
+   <sender>browseEmbedOutputButton</sender>
    <signal>clicked()</signal>
    <receiver>MoD</receiver>
-   <slot>onEncryptButtonClicked()</slot>
+   <slot>onBrowseEmbedOutputButtonClicked()</slot>
   </connection>
   <connection>
-   <sender>browseRunButton</sender>
+   <sender>createEmbeddedButton</sender>
    <signal>clicked()</signal>
    <receiver>MoD</receiver>
-   <slot>onBrowseRunButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>runButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onRunButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>browseMemoryEncryptButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onBrowseMemoryEncryptButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>memoryEncryptButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onMemoryEncryptButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>browseMemoryRunButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onBrowseMemoryRunButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>memoryRunButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onMemoryRunButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>browseRuntimeProtectEncryptButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onBrowseRuntimeProtectEncryptButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>runtimeProtectEncryptButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onRuntimeProtectEncryptButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>browseRuntimeProtectRunButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onBrowseRuntimeProtectRunButtonClicked()</slot>
-  </connection>
-  <connection>
-   <sender>runtimeProtectRunButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MoD</receiver>
-   <slot>onRuntimeProtectRunButtonClicked()</slot>
+   <slot>onCreateEmbeddedButtonClicked()</slot>
   </connection>
  </connections>
 </ui>

@@ -33,14 +33,16 @@ SOURCES += \
         hardwarefingerprint.cpp \
         executableencryptor.cpp \
         memoryexecuteloader.cpp \
-        runtimeprotector.cpp
+        runtimeprotector.cpp \
+        executableembedder.cpp
 
 HEADERS += \
         mod.h \
         hardwarefingerprint.h \
         executableencryptor.h \
         memoryexecuteloader.h \
-        runtimeprotector.h
+        runtimeprotector.h \
+        executableembedder.h
 
 FORMS += \
         mod.ui

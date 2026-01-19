@@ -30,109 +30,30 @@ private slots:
     void onGenerateButtonClicked();
     
     /**
-     * @brief Slot to handle browse button for encryption
-     * Opens file dialog to select executable file to encrypt
+     * @brief Slot to handle browse button for original executable
+     * Opens file dialog to select original executable file to embed
      */
-    void onBrowseEncryptButtonClicked();
+    void onBrowseEmbedOriginalButtonClicked();
     
     /**
-     * @brief Slot to handle encrypt button click
-     * Encrypts the selected executable file with hardware key
+     * @brief Slot to handle browse button for output executable
+     * Opens file dialog to select where to save the embedded executable
      */
-    void onEncryptButtonClicked();
+    void onBrowseEmbedOutputButtonClicked();
     
     /**
-     * @brief Slot to handle browse button for running
-     * Opens file dialog to select encrypted executable file
+     * @brief Slot to handle create embedded executable button click
+     * Creates an embedded executable with hardware key protection
      */
-    void onBrowseRunButtonClicked();
-    
-    /**
-     * @brief Slot to handle run button click
-     * Decrypts and runs the selected encrypted executable
-     */
-    void onRunButtonClicked();
-    
-    /**
-     * @brief Slot to handle browse button for memory encryption
-     * Opens file dialog to select executable file to encrypt with hardware key
-     */
-    void onBrowseMemoryEncryptButtonClicked();
-    
-    /**
-     * @brief Slot to handle memory encrypt button click
-     * Encrypts the selected executable file with hardware key (for memory execution)
-     */
-    void onMemoryEncryptButtonClicked();
-    
-    /**
-     * @brief Slot to handle browse button for memory execution
-     * Opens file dialog to select encrypted executable file for memory execution
-     */
-    void onBrowseMemoryRunButtonClicked();
-    
-    /**
-     * @brief Slot to handle memory run button click
-     * Decrypts and runs the selected encrypted executable directly from memory
-     */
-    void onMemoryRunButtonClicked();
-    
-    /**
-     * @brief Slot to handle browse button for runtime protection encryption
-     * Opens file dialog to select executable file to encrypt with runtime protection
-     */
-    void onBrowseRuntimeProtectEncryptButtonClicked();
-    
-    /**
-     * @brief Slot to handle runtime protection encrypt button click
-     * Encrypts the selected executable file with hardware binding and runtime protection
-     */
-    void onRuntimeProtectEncryptButtonClicked();
-    
-    /**
-     * @brief Slot to handle browse button for runtime protection execution
-     * Opens file dialog to select protected encrypted executable file
-     */
-    void onBrowseRuntimeProtectRunButtonClicked();
-    
-    /**
-     * @brief Slot to handle runtime protection run button click
-     * Decrypts and runs the selected protected executable with hardware verification
-     */
-    void onRuntimeProtectRunButtonClicked();
+    void onCreateEmbeddedButtonClicked();
 
 private:
     Ui::MoD *ui;
     
     /**
-     * @brief Update encrypt button enabled state based on file selection
+     * @brief Update create embedded button enabled state based on file selections
      */
-    void updateEncryptButtonState();
-    
-    /**
-     * @brief Update run button enabled state based on file selection
-     */
-    void updateRunButtonState();
-    
-    /**
-     * @brief Update memory encrypt button enabled state based on file selection
-     */
-    void updateMemoryEncryptButtonState();
-    
-    /**
-     * @brief Update memory run button enabled state based on file selection
-     */
-    void updateMemoryRunButtonState();
-    
-    /**
-     * @brief Update runtime protection encrypt button enabled state based on file selection
-     */
-    void updateRuntimeProtectEncryptButtonState();
-    
-    /**
-     * @brief Update runtime protection run button enabled state based on file selection
-     */
-    void updateRuntimeProtectRunButtonState();
+    void updateCreateEmbeddedButtonState();
 };
 
 #endif // MOD_H
