@@ -280,38 +280,72 @@ bool MemoryExecuteLoader::encryptExecutable(const QString &inputFilePath,
 int MemoryExecuteLoader::executeFromMemory(const QByteArray &executableData,
                                           const QStringList &arguments)
 {
+    QString tempFilePath;
+    
     // Create a temporary file for execution (Windows doesn't support true in-memory execution easily)
-    // But we'll use a very short-lived temporary file that's deleted immediately after process starts
-    QTemporaryFile tempFile(QDir::tempPath() + QDir::separator() + "mem_exec_XXXXXX.exe");
-    tempFile.setAutoRemove(true); // Auto-remove when closed
+    // Use a scope block to ensure file handle is fully released
+    {
+        QTemporaryFile tempFile(QDir::tempPath() + QDir::separator() + "mem_exec_XXXXXX.exe");
+        tempFile.setAutoRemove(false); // Don't auto-remove, we'll delete manually after process finishes
+        
+        if (!tempFile.open()) {
+            qDebug() << "Failed to create temporary file for execution";
+            return -1;
+        }
+        
+        tempFilePath = tempFile.fileName();
+        
+        // Write executable data
+        qint64 written = tempFile.write(executableData);
+        
+        // Flush the data to disk before closing (important on Windows)
+        tempFile.flush();
+        
+        // Close the file explicitly
+        tempFile.close();
+        
+        if (written != static_cast<qint64>(executableData.size())) {
+            qDebug() << "Failed to write executable data to temp file";
+            QFile::remove(tempFilePath);
+            return -1;
+        }
+    } // Scope ends here, ensuring QTemporaryFile is fully destroyed and file handle released
     
-    if (!tempFile.open()) {
-        qDebug() << "Failed to create temporary file for execution";
+    // On Windows, wait a moment to ensure file handle is fully released
+    // This is necessary because Windows file handles can take a moment to release
+    QThread::msleep(100); // Small delay to let Windows release the file handle
+    
+    // Verify the file exists and has content
+    QFileInfo tempFileInfo(tempFilePath);
+    tempFileInfo.refresh(); // Force refresh to ensure we have latest info
+    if (!tempFileInfo.exists() || tempFileInfo.size() == 0) {
+        qDebug() << "Temporary file does not exist or is empty";
+        qDebug() << "File path:" << tempFilePath;
+        qDebug() << "File exists:" << tempFileInfo.exists();
+        qDebug() << "File size:" << tempFileInfo.size();
+        QFile::remove(tempFilePath);
         return -1;
     }
     
-    QString tempFilePath = tempFile.fileName();
-    
-    // Write executable data
-    qint64 written = tempFile.write(executableData);
-    tempFile.flush();
-    tempFile.close(); // Close immediately
-    
-    if (written != static_cast<qint64>(executableData.size())) {
-        qDebug() << "Failed to write executable data to temp file";
+    // Verify we can actually access the file before trying to execute it
+    QFile testAccess(tempFilePath);
+    if (!testAccess.open(QIODevice::ReadOnly)) {
+        qDebug() << "Cannot open temporary file for reading - file may still be locked";
+        qDebug() << "File error:" << testAccess.errorString();
+        QFile::remove(tempFilePath);
         return -1;
     }
-    
-    // Small delay to ensure file is written
-    QThread::msleep(50);
+    testAccess.close(); // Close immediately after verifying access
     
     // Execute using QProcess
     QProcess process;
+    qDebug() << "Starting process from temp file:" << tempFilePath;
     process.start(tempFilePath, arguments);
     
     if (!process.waitForStarted(5000)) {
         qDebug() << "Failed to start process";
         qDebug() << "Error:" << process.errorString();
+        QFile::remove(tempFilePath);
         return -1;
     }
     
@@ -320,49 +354,62 @@ int MemoryExecuteLoader::executeFromMemory(const QByteArray &executableData,
     
     int exitCode = process.exitCode();
     
-    // File will be auto-removed when tempFile goes out of scope
+    // Clean up temporary file after process has finished
+    QFile::remove(tempFilePath);
+    
     return exitCode;
 }
 #else
 int MemoryExecuteLoader::executeFromMemory(const QByteArray &executableData,
                                           const QStringList &arguments)
 {
+    QString tempFilePath;
+    
     // For non-Windows, use similar approach
-    QTemporaryFile tempFile(QDir::tempPath() + QDir::separator() + "mem_exec_XXXXXX");
-    tempFile.setAutoRemove(true);
-    
-    if (!tempFile.open()) {
-        qDebug() << "Failed to create temporary file for execution";
-        return -1;
-    }
-    
-    QString tempFilePath = tempFile.fileName();
-    
-    qint64 written = tempFile.write(executableData);
-    tempFile.flush();
-    tempFile.close();
-    
-    if (written != static_cast<qint64>(executableData.size())) {
-        qDebug() << "Failed to write executable data";
-        return -1;
-    }
+    {
+        QTemporaryFile tempFile(QDir::tempPath() + QDir::separator() + "mem_exec_XXXXXX");
+        tempFile.setAutoRemove(false); // Don't auto-remove, we'll delete manually
+        
+        if (!tempFile.open()) {
+            qDebug() << "Failed to create temporary file for execution";
+            return -1;
+        }
+        
+        tempFilePath = tempFile.fileName();
+        
+        qint64 written = tempFile.write(executableData);
+        tempFile.flush();
+        tempFile.close();
+        
+        if (written != static_cast<qint64>(executableData.size())) {
+            qDebug() << "Failed to write executable data";
+            QFile::remove(tempFilePath);
+            return -1;
+        }
+    } // Scope ends here, ensuring file handle is released
     
     // Make executable
     QFile::setPermissions(tempFilePath, QFile::ReadUser | QFile::WriteUser | QFile::ExeUser);
     
-    QThread::msleep(50);
+    QThread::msleep(100);
     
     QProcess process;
     process.start(tempFilePath, arguments);
     
     if (!process.waitForStarted(5000)) {
         qDebug() << "Failed to start process";
+        QFile::remove(tempFilePath);
         return -1;
     }
     
     process.waitForFinished(-1);
     
-    return process.exitCode();
+    int exitCode = process.exitCode();
+    
+    // Clean up temporary file after process has finished
+    QFile::remove(tempFilePath);
+    
+    return exitCode;
 }
 #endif
 
