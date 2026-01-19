@@ -76,6 +76,30 @@ private slots:
      * Decrypts and runs the selected encrypted executable directly from memory
      */
     void onMemoryRunButtonClicked();
+    
+    /**
+     * @brief Slot to handle browse button for runtime protection encryption
+     * Opens file dialog to select executable file to encrypt with runtime protection
+     */
+    void onBrowseRuntimeProtectEncryptButtonClicked();
+    
+    /**
+     * @brief Slot to handle runtime protection encrypt button click
+     * Encrypts the selected executable file with hardware binding and runtime protection
+     */
+    void onRuntimeProtectEncryptButtonClicked();
+    
+    /**
+     * @brief Slot to handle browse button for runtime protection execution
+     * Opens file dialog to select protected encrypted executable file
+     */
+    void onBrowseRuntimeProtectRunButtonClicked();
+    
+    /**
+     * @brief Slot to handle runtime protection run button click
+     * Decrypts and runs the selected protected executable with hardware verification
+     */
+    void onRuntimeProtectRunButtonClicked();
 
 private:
     Ui::MoD *ui;
@@ -99,6 +123,16 @@ private:
      * @brief Update memory run button enabled state based on file selection
      */
     void updateMemoryRunButtonState();
+    
+    /**
+     * @brief Update runtime protection encrypt button enabled state based on file selection
+     */
+    void updateRuntimeProtectEncryptButtonState();
+    
+    /**
+     * @brief Update runtime protection run button enabled state based on file selection
+     */
+    void updateRuntimeProtectRunButtonState();
 };
 
 #endif // MOD_H

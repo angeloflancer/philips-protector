@@ -32,13 +32,15 @@ SOURCES += \
         mod.cpp \
         hardwarefingerprint.cpp \
         executableencryptor.cpp \
-        memoryexecuteloader.cpp
+        memoryexecuteloader.cpp \
+        runtimeprotector.cpp
 
 HEADERS += \
         mod.h \
         hardwarefingerprint.h \
         executableencryptor.h \
-        memoryexecuteloader.h
+        memoryexecuteloader.h \
+        runtimeprotector.h
 
 FORMS += \
         mod.ui

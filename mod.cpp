@@ -3,6 +3,7 @@
 #include "hardwarefingerprint.h"
 #include "executableencryptor.h"
 #include "memoryexecuteloader.h"
+#include "runtimeprotector.h"
 #include <QPalette>
 #include <QDebug>
 #include <QFileDialog>
@@ -23,6 +24,8 @@ MoD::MoD(QWidget *parent) :
     connect(ui->runFileLineEdit, &QLineEdit::textChanged, this, &MoD::updateRunButtonState);
     connect(ui->memoryEncryptFileLineEdit, &QLineEdit::textChanged, this, &MoD::updateMemoryEncryptButtonState);
     connect(ui->memoryRunFileLineEdit, &QLineEdit::textChanged, this, &MoD::updateMemoryRunButtonState);
+    connect(ui->runtimeProtectEncryptFileLineEdit, &QLineEdit::textChanged, this, &MoD::updateRuntimeProtectEncryptButtonState);
+    connect(ui->runtimeProtectRunFileLineEdit, &QLineEdit::textChanged, this, &MoD::updateRuntimeProtectRunButtonState);
     
     // Auto-generate key on startup
     onGenerateButtonClicked();
@@ -328,4 +331,141 @@ void MoD::updateMemoryRunButtonState()
     QString filePath = ui->memoryRunFileLineEdit->text();
     bool isValid = !filePath.isEmpty() && QFile::exists(filePath);
     ui->memoryRunButton->setEnabled(isValid);
+}
+
+void MoD::onBrowseRuntimeProtectEncryptButtonClicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+        this,
+        tr("Select Executable File"),
+        QString(),
+        tr("Executable Files (*.exe);;All Files (*.*)")
+    );
+    
+    if (!fileName.isEmpty()) {
+        ui->runtimeProtectEncryptFileLineEdit->setText(fileName);
+        updateRuntimeProtectEncryptButtonState();
+    }
+}
+
+void MoD::onRuntimeProtectEncryptButtonClicked()
+{
+    QString inputFile = ui->runtimeProtectEncryptFileLineEdit->text();
+    
+    if (inputFile.isEmpty() || !QFile::exists(inputFile)) {
+        QMessageBox::warning(this, tr("Error"), tr("Please select a valid executable file."));
+        return;
+    }
+    
+    // Get hardware key
+    qDebug() << "[RUNTIME PROTECT ENCRYPT] Generating hardware key...";
+    QString hardwareKey = HardwareFingerprint::generateHardwareKey();
+    qDebug() << "[RUNTIME PROTECT ENCRYPT] Hardware key:" << hardwareKey;
+    
+    if (hardwareKey.isEmpty()) {
+        QMessageBox::critical(this, tr("Error"), tr("Failed to generate hardware key. Cannot encrypt file."));
+        return;
+    }
+    
+    // Ask user for output file location
+    QFileInfo fileInfo(inputFile);
+    QString defaultOutput = fileInfo.path() + QDir::separator() + fileInfo.baseName() + "_protected";
+    
+    QString outputFile = QFileDialog::getSaveFileName(
+        this,
+        tr("Save Protected Executable File"),
+        defaultOutput,
+        tr("Protected Files (*.protected);;All Files (*.*)")
+    );
+    
+    if (outputFile.isEmpty()) {
+        return; // User cancelled
+    }
+    
+    // Encrypt with runtime protection
+    ui->statusBar->showMessage(tr("Encrypting with runtime protection..."), 0);
+    ui->runtimeProtectEncryptButton->setEnabled(false);
+    
+    bool success = RuntimeProtector::encryptWithRuntimeProtection(inputFile, outputFile, hardwareKey);
+    
+    ui->runtimeProtectEncryptButton->setEnabled(true);
+    
+    if (success) {
+        ui->statusBar->showMessage(tr("File encrypted with runtime protection: %1").arg(outputFile), 5000);
+        QMessageBox::information(this, tr("Success"), 
+            tr("File encrypted successfully with runtime protection!\n\n"
+               "Protected file saved to:\n%1\n\n"
+               "This file:\n"
+               "- Is bound to this machine's hardware\n"
+               "- Will verify hardware at runtime\n"
+               "- Includes anti-debugging protection\n"
+               "- Will NOT run on other machines, even if decrypted").arg(outputFile));
+    } else {
+        ui->statusBar->showMessage(tr("Encryption failed. Check debug output for details."), 5000);
+        QMessageBox::critical(this, tr("Error"), tr("Failed to encrypt file with runtime protection. Check debug output for details."));
+    }
+}
+
+void MoD::onBrowseRuntimeProtectRunButtonClicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+        this,
+        tr("Select Protected Executable File"),
+        QString(),
+        tr("Protected Files (*.protected);;All Files (*.*)")
+    );
+    
+    if (!fileName.isEmpty()) {
+        ui->runtimeProtectRunFileLineEdit->setText(fileName);
+        updateRuntimeProtectRunButtonState();
+    }
+}
+
+void MoD::onRuntimeProtectRunButtonClicked()
+{
+    QString protectedFile = ui->runtimeProtectRunFileLineEdit->text();
+    
+    if (protectedFile.isEmpty() || !QFile::exists(protectedFile)) {
+        QMessageBox::warning(this, tr("Error"), tr("Please select a valid protected file."));
+        return;
+    }
+    
+    // Decrypt and run with runtime protection
+    ui->statusBar->showMessage(tr("Verifying hardware and running protected executable..."), 0);
+    ui->runtimeProtectRunButton->setEnabled(false);
+    
+    int exitCode = RuntimeProtector::decryptAndExecuteProtected(protectedFile);
+    
+    ui->runtimeProtectRunButton->setEnabled(true);
+    
+    if (exitCode == -1) {
+        ui->statusBar->showMessage(tr("Failed to run protected executable. Hardware may not match or debugger detected."), 5000);
+        QMessageBox::critical(this, tr("Error"), 
+            tr("Failed to run protected executable.\n\nPossible reasons:\n"
+               "- Hardware fingerprint does not match (file was encrypted for a different machine)\n"
+               "- Debugger detected (anti-debugging protection)\n"
+               "- File is corrupted\n"
+               "- File is not a valid protected executable"));
+    } else {
+        ui->statusBar->showMessage(tr("Protected executable ran successfully (exit code: %1)").arg(exitCode), 5000);
+        QMessageBox::information(this, tr("Success"), 
+            tr("Protected executable executed successfully!\n\n"
+               "Exit code: %1\n\n"
+               "Hardware verification: PASSED\n"
+               "Anti-debugging checks: PASSED").arg(exitCode));
+    }
+}
+
+void MoD::updateRuntimeProtectEncryptButtonState()
+{
+    QString filePath = ui->runtimeProtectEncryptFileLineEdit->text();
+    bool isValid = !filePath.isEmpty() && QFile::exists(filePath);
+    ui->runtimeProtectEncryptButton->setEnabled(isValid);
+}
+
+void MoD::updateRuntimeProtectRunButtonState()
+{
+    QString filePath = ui->runtimeProtectRunFileLineEdit->text();
+    bool isValid = !filePath.isEmpty() && QFile::exists(filePath);
+    ui->runtimeProtectRunButton->setEnabled(isValid);
 }

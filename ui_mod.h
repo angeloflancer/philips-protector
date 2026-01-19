@@ -60,6 +60,17 @@ public:
     QLineEdit *memoryRunFileLineEdit;
     QPushButton *browseMemoryRunButton;
     QPushButton *memoryRunButton;
+    QGroupBox *runtimeProtectGroup;
+    QVBoxLayout *runtimeProtectLayout;
+    QLabel *labelRuntimeProtectDescription;
+    QHBoxLayout *runtimeProtectEncryptFileLayout;
+    QLineEdit *runtimeProtectEncryptFileLineEdit;
+    QPushButton *browseRuntimeProtectEncryptButton;
+    QPushButton *runtimeProtectEncryptButton;
+    QHBoxLayout *runtimeProtectRunFileLayout;
+    QLineEdit *runtimeProtectRunFileLineEdit;
+    QPushButton *browseRuntimeProtectRunButton;
+    QPushButton *runtimeProtectRunButton;
     QSpacerItem *verticalSpacer;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
@@ -68,7 +79,7 @@ public:
     {
         if (MoD->objectName().isEmpty())
             MoD->setObjectName(QStringLiteral("MoD"));
-        MoD->resize(750, 750);
+        MoD->resize(750, 950);
         centralWidget = new QWidget(MoD);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         mainVerticalLayout = new QVBoxLayout(centralWidget);
@@ -245,6 +256,67 @@ public:
 
         mainVerticalLayout->addWidget(memoryExecGroup);
 
+        runtimeProtectGroup = new QGroupBox(centralWidget);
+        runtimeProtectGroup->setObjectName(QStringLiteral("runtimeProtectGroup"));
+        runtimeProtectGroup->setFont(font);
+        runtimeProtectLayout = new QVBoxLayout(runtimeProtectGroup);
+        runtimeProtectLayout->setSpacing(10);
+        runtimeProtectLayout->setObjectName(QStringLiteral("runtimeProtectLayout"));
+        labelRuntimeProtectDescription = new QLabel(runtimeProtectGroup);
+        labelRuntimeProtectDescription->setObjectName(QStringLiteral("labelRuntimeProtectDescription"));
+        labelRuntimeProtectDescription->setFont(font1);
+        labelRuntimeProtectDescription->setWordWrap(true);
+
+        runtimeProtectLayout->addWidget(labelRuntimeProtectDescription);
+
+        runtimeProtectEncryptFileLayout = new QHBoxLayout();
+        runtimeProtectEncryptFileLayout->setObjectName(QStringLiteral("runtimeProtectEncryptFileLayout"));
+        runtimeProtectEncryptFileLineEdit = new QLineEdit(runtimeProtectGroup);
+        runtimeProtectEncryptFileLineEdit->setObjectName(QStringLiteral("runtimeProtectEncryptFileLineEdit"));
+        runtimeProtectEncryptFileLineEdit->setReadOnly(true);
+
+        runtimeProtectEncryptFileLayout->addWidget(runtimeProtectEncryptFileLineEdit);
+
+        browseRuntimeProtectEncryptButton = new QPushButton(runtimeProtectGroup);
+        browseRuntimeProtectEncryptButton->setObjectName(QStringLiteral("browseRuntimeProtectEncryptButton"));
+        browseRuntimeProtectEncryptButton->setMinimumWidth(80);
+
+        runtimeProtectEncryptFileLayout->addWidget(browseRuntimeProtectEncryptButton);
+
+        runtimeProtectLayout->addLayout(runtimeProtectEncryptFileLayout);
+
+        runtimeProtectEncryptButton = new QPushButton(runtimeProtectGroup);
+        runtimeProtectEncryptButton->setObjectName(QStringLiteral("runtimeProtectEncryptButton"));
+        runtimeProtectEncryptButton->setMinimumHeight(35);
+        runtimeProtectEncryptButton->setEnabled(false);
+
+        runtimeProtectLayout->addWidget(runtimeProtectEncryptButton);
+
+        runtimeProtectRunFileLayout = new QHBoxLayout();
+        runtimeProtectRunFileLayout->setObjectName(QStringLiteral("runtimeProtectRunFileLayout"));
+        runtimeProtectRunFileLineEdit = new QLineEdit(runtimeProtectGroup);
+        runtimeProtectRunFileLineEdit->setObjectName(QStringLiteral("runtimeProtectRunFileLineEdit"));
+        runtimeProtectRunFileLineEdit->setReadOnly(true);
+
+        runtimeProtectRunFileLayout->addWidget(runtimeProtectRunFileLineEdit);
+
+        browseRuntimeProtectRunButton = new QPushButton(runtimeProtectGroup);
+        browseRuntimeProtectRunButton->setObjectName(QStringLiteral("browseRuntimeProtectRunButton"));
+        browseRuntimeProtectRunButton->setMinimumWidth(80);
+
+        runtimeProtectRunFileLayout->addWidget(browseRuntimeProtectRunButton);
+
+        runtimeProtectLayout->addLayout(runtimeProtectRunFileLayout);
+
+        runtimeProtectRunButton = new QPushButton(runtimeProtectGroup);
+        runtimeProtectRunButton->setObjectName(QStringLiteral("runtimeProtectRunButton"));
+        runtimeProtectRunButton->setMinimumHeight(35);
+        runtimeProtectRunButton->setEnabled(false);
+
+        runtimeProtectLayout->addWidget(runtimeProtectRunButton);
+
+        mainVerticalLayout->addWidget(runtimeProtectGroup);
+
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         mainVerticalLayout->addItem(verticalSpacer);
@@ -267,6 +339,10 @@ public:
         QObject::connect(memoryEncryptButton, SIGNAL(clicked()), MoD, SLOT(onMemoryEncryptButtonClicked()));
         QObject::connect(browseMemoryRunButton, SIGNAL(clicked()), MoD, SLOT(onBrowseMemoryRunButtonClicked()));
         QObject::connect(memoryRunButton, SIGNAL(clicked()), MoD, SLOT(onMemoryRunButtonClicked()));
+        QObject::connect(browseRuntimeProtectEncryptButton, SIGNAL(clicked()), MoD, SLOT(onBrowseRuntimeProtectEncryptButtonClicked()));
+        QObject::connect(runtimeProtectEncryptButton, SIGNAL(clicked()), MoD, SLOT(onRuntimeProtectEncryptButtonClicked()));
+        QObject::connect(browseRuntimeProtectRunButton, SIGNAL(clicked()), MoD, SLOT(onBrowseRuntimeProtectRunButtonClicked()));
+        QObject::connect(runtimeProtectRunButton, SIGNAL(clicked()), MoD, SLOT(onRuntimeProtectRunButtonClicked()));
 
         QMetaObject::connectSlotsByName(MoD);
     } // setupUi
@@ -296,6 +372,14 @@ public:
         memoryRunFileLineEdit->setPlaceholderText(QApplication::translate("MoD", "No encrypted file selected...", nullptr));
         browseMemoryRunButton->setText(QApplication::translate("MoD", "Browse...", nullptr));
         memoryRunButton->setText(QApplication::translate("MoD", "Run from Memory (No Decrypt to Disk)", nullptr));
+        runtimeProtectGroup->setTitle(QApplication::translate("MoD", "Runtime Protection (Hardware-Bound + Anti-Debugging)", nullptr));
+        labelRuntimeProtectDescription->setText(QApplication::translate("MoD", "Advanced protection: Embeds hardware fingerprint, verifies at runtime, and includes anti-debugging. Even if decrypted, won't run on other machines:", nullptr));
+        runtimeProtectEncryptFileLineEdit->setPlaceholderText(QApplication::translate("MoD", "No file selected...", nullptr));
+        browseRuntimeProtectEncryptButton->setText(QApplication::translate("MoD", "Browse...", nullptr));
+        runtimeProtectEncryptButton->setText(QApplication::translate("MoD", "Encrypt with Runtime Protection", nullptr));
+        runtimeProtectRunFileLineEdit->setPlaceholderText(QApplication::translate("MoD", "No protected file selected...", nullptr));
+        browseRuntimeProtectRunButton->setText(QApplication::translate("MoD", "Browse...", nullptr));
+        runtimeProtectRunButton->setText(QApplication::translate("MoD", "Run Protected Executable", nullptr));
     } // retranslateUi
 
 };
