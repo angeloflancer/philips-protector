@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "sVqexLNNYDE=",
+  "dgSpecHash": "ZyTjdtJyCOU=",
   "success": true,
-  "projectFilePath": "E:\\Projects\\philips-protector\\philips-protector\\philips-protector.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Project\\philips-protector\\philips-protector\\philips-protector.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\MoD\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.22\\microsoft.net.illink.tasks.8.0.22.nupkg.sha512",
+    "C:\\Users\\MoD\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.22\\microsoft.netcore.app.runtime.win-x64.8.0.22.nupkg.sha512",
+    "C:\\Users\\MoD\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.22\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.22.nupkg.sha512",
+    "C:\\Users\\MoD\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.22\\microsoft.aspnetcore.app.runtime.win-x64.8.0.22.nupkg.sha512"
+  ],
   "logs": []
 }
