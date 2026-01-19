@@ -24,14 +24,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
+# Link Windows CryptoAPI library for executable encryption
+win32: LIBS += -ladvapi32
+
 SOURCES += \
         main.cpp \
         mod.cpp \
-        hardwarefingerprint.cpp
+        hardwarefingerprint.cpp \
+        executableencryptor.cpp
 
 HEADERS += \
         mod.h \
-        hardwarefingerprint.h
+        hardwarefingerprint.h \
+        executableencryptor.h
 
 FORMS += \
         mod.ui
