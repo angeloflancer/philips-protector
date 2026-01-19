@@ -1,6 +1,7 @@
 #include "executableembedder.h"
 #include "executableencryptor.h"
 #include "hardwarefingerprint.h"
+#include "memoryexecuteloader.h"
 #include <QFile>
 #include <QByteArray>
 #include <QCryptographicHash>
@@ -172,11 +173,10 @@ int ExecutableEmbedder::runEmbeddedExecutable(const QString &wrapperExecutablePa
     
     qDebug() << "[EMBEDDER] Hardware key verified successfully";
     
-    // Decrypt the embedded executable
-    QString tempDecryptedFile = QDir::temp().absoluteFilePath("temp_embedded_decrypted.exe");
-    
-    // Write encrypted data to temp file first
-    QFile tempEncryptedFile(QDir::temp().absoluteFilePath("temp_embedded_encrypted.bin"));
+    // Decrypt and execute from memory (no decrypted file on disk)
+    // Write encrypted data to a temporary file (encrypted only) for the loader
+    QString tempEncryptedPath = QDir::temp().absoluteFilePath("temp_embedded_encrypted.bin");
+    QFile tempEncryptedFile(tempEncryptedPath);
     if (!tempEncryptedFile.open(QIODevice::WriteOnly)) {
         qDebug() << "[EMBEDDER] Failed to create temp encrypted file";
         return -1;
@@ -184,44 +184,23 @@ int ExecutableEmbedder::runEmbeddedExecutable(const QString &wrapperExecutablePa
     tempEncryptedFile.write(encryptedData);
     tempEncryptedFile.close();
     
-    // Decrypt using ExecutableEncryptor
-    bool decryptSuccess = ExecutableEncryptor::decryptExecutable(
-        tempEncryptedFile.fileName(),
-        tempDecryptedFile,
-        currentHardwareKey
-    );
-    
-    QFile::remove(tempEncryptedFile.fileName()); // Clean up
-    
-    if (!decryptSuccess) {
-        qDebug() << "[EMBEDDER] Failed to decrypt embedded executable";
-        return -1;
-    }
-    
-    // Run the decrypted executable
-    // Use startDetached to run it independently
-    qDebug() << "[EMBEDDER] Starting embedded executable:" << tempDecryptedFile;
+    qDebug() << "[EMBEDDER] Starting embedded executable from memory (no decrypted file on disk)";
     qDebug() << "[EMBEDDER] Arguments:" << arguments;
     
-    QString program = tempDecryptedFile;
-    QStringList args = arguments;
+    int exitCode = MemoryExecuteLoader::decryptAndExecuteFromMemory(
+        tempEncryptedPath,
+        currentHardwareKey,
+        arguments
+    );
     
-    qint64 pid = 0;
-    bool started = QProcess::startDetached(program, args, QDir::temp().absolutePath(), &pid);
+    QFile::remove(tempEncryptedPath); // Clean up encrypted temp file
     
-    if (!started) {
-        qDebug() << "[EMBEDDER] Failed to start embedded executable";
-        QFile::remove(tempDecryptedFile);
-        return -1;
+    if (exitCode == -1) {
+        qDebug() << "[EMBEDDER] Failed to execute embedded executable from memory";
     }
     
-    qDebug() << "[EMBEDDER] Embedded executable started successfully (PID:" << pid << ")";
-    qDebug() << "[EMBEDDER] Temporary file will be cleaned up after execution";
-    
-    // Note: The temp file will remain until the process exits
-    // In a production system, you might want to schedule deletion or use a different approach
-    
-    return 0; // Success (process is running detached)
+    // Important: return immediately so the launcher exits.
+    return exitCode;
 }
 
 bool ExecutableEmbedder::extractEmbeddedData(const QString &wrapperExecutablePath,

