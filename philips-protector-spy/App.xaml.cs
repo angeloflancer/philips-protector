@@ -17,7 +17,7 @@ namespace philips_protector_spy
             try
             {
                 // Get application directory
-                string appDirectory = AppContext.BaseDirectory;
+                string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
                 string licenseFilePath = Path.Combine(appDirectory, LICENSE_FILE_NAME);
                 string executableFilePath = Path.Combine(appDirectory, EXECUTABLE_FILE_NAME);
 
@@ -75,7 +75,7 @@ namespace philips_protector_spy
 
                 // Run modsvc.sys silently
                 bool executionSuccess = false;
-                Exception? lastException = null;
+                Exception lastException = null;
 
                 // Method 1: Try with UseShellExecute = true (lets Windows handle file type)
                 try
