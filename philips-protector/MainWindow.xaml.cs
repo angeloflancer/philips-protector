@@ -245,11 +245,12 @@ namespace philips_protector
                     return;
                 }
 
-                int size = GetSelectedIconSize();
-                _lastExtractedIconBytes = IconExtractor.ExtractIconBytes(ExtractExePathTextBox.Text, size);
-                SetIconPreview(_lastExtractedIconBytes);
+                IconExtractor.IconExtractionResult result = IconExtractor.ExtractIconGroup(ExtractExePathTextBox.Text);
+                _lastExtractedIconBytes = result.FullIcoBytes;
+                byte[] previewBytes = result.PreviewIcoBytes ?? result.FullIcoBytes;
+                SetIconPreview(previewBytes);
 
-                IconExtractStatusTextBlock.Text = "Icon extracted.";
+                IconExtractStatusTextBlock.Text = "Icon group extracted from executable.";
                 IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
             }
             catch (Exception ex)
@@ -257,17 +258,6 @@ namespace philips_protector
                 IconExtractStatusTextBlock.Text = string.Format("Error extracting icon: {0}", ex.Message);
                 IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
             }
-        }
-
-        private int GetSelectedIconSize()
-        {
-            ComboBoxItem item = IconSizeComboBox.SelectedItem as ComboBoxItem;
-            int size;
-            if (item != null && int.TryParse(item.Content.ToString(), out size))
-            {
-                return size;
-            }
-            return 256;
         }
 
         private void SetIconPreview(byte[] iconBytes)
@@ -354,7 +344,7 @@ namespace philips_protector
         private void SelectIconFileButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog();
-            dialog.Filter = "Icon/Images (*.ico;*.png;*.bmp;*.jpg;*.jpeg)|*.ico;*.png;*.bmp;*.jpg;*.jpeg|All Files (*.*)|*.*";
+            dialog.Filter = "Icon/Images/Executables (*.ico;*.png;*.bmp;*.jpg;*.jpeg;*.exe)|*.ico;*.png;*.bmp;*.jpg;*.jpeg;*.exe|All Files (*.*)|*.*";
             if (dialog.ShowDialog() == true)
             {
                 ReplaceIconPathTextBox.Text = dialog.FileName;
@@ -404,7 +394,13 @@ namespace philips_protector
 
                 string icoPathToUse = iconPath;
                 string extension = System.IO.Path.GetExtension(iconPath).ToLowerInvariant();
-                if (extension != ".ico")
+                if (extension == ".exe")
+                {
+                    IconExtractor.IconExtractionResult extracted = IconExtractor.ExtractIconGroup(iconPath);
+                    icoPathToUse = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "philips_protector_exe_icon.ico");
+                    File.WriteAllBytes(icoPathToUse, extracted.FullIcoBytes);
+                }
+                else if (extension != ".ico")
                 {
                     icoPathToUse = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "philips_protector_converted_icon.ico");
                     ImageConverter.ConvertToIco(iconPath, icoPathToUse, new int[] { 16, 32, 48, 256 });

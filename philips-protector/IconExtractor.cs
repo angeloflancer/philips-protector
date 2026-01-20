@@ -17,49 +17,66 @@ namespace philips_protector
         private const int LOAD_LIBRARY_AS_IMAGE_RESOURCE = 0x00000020;
 
         /// <summary>
-        /// Extracts ICO bytes for the preferred size (falls back to closest available).
+        /// Extracts the full icon group from the executable and returns both the multi-size ICO and a preview ICO.
         /// </summary>
-        public static byte[] ExtractIconBytes(string exePath, int preferredSize)
+        public static IconExtractionResult ExtractIconGroup(string exePath)
         {
             if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
                 throw new FileNotFoundException("Executable not found.", exePath);
 
-            // Use both DATAFILE and IMAGE_RESOURCE to improve resource access compatibility.
             IntPtr hModule = LoadLibraryEx(exePath, IntPtr.Zero, LOAD_LIBRARY_AS_DATAFILE | LOAD_LIBRARY_AS_IMAGE_RESOURCE);
             if (hModule == IntPtr.Zero)
                 throw new InvalidOperationException("Failed to load executable for resource inspection.");
 
             try
             {
-                // Collect all icon groups, pick the first (or best) later.
                 var groupIds = new List<IntPtr>();
                 EnumResNameDelegate cb = delegate (IntPtr h, IntPtr type, IntPtr name, IntPtr param)
                 {
                     groupIds.Add(name);
-                    return true; // continue to gather all
+                    return true;
                 };
 
                 bool enumResult = EnumResourceNames(hModule, new IntPtr(RT_GROUP_ICON), cb, IntPtr.Zero);
                 int lastError = Marshal.GetLastWin32Error();
 
                 if ((!enumResult && lastError != 0) || groupIds.Count == 0)
-                {
                     throw new InvalidOperationException("No icon groups found in the executable.");
-                }
 
-                // Use the first group (consistent with “first available”), or could add selection logic later.
                 IntPtr groupId = groupIds[0];
 
                 byte[] groupData = LoadResourceData(hModule, RT_GROUP_ICON, groupId);
                 if (groupData == null || groupData.Length < 6)
                     throw new InvalidOperationException("Invalid icon group data.");
 
-                GroupIconEntry chosen = SelectBestEntry(groupData, preferredSize);
-                byte[] iconImage = LoadResourceData(hModule, RT_ICON, new IntPtr(chosen.ResourceId));
-                if (iconImage == null || iconImage.Length == 0)
+                List<GroupIconEntry> entries = ParseGroupEntries(groupData);
+                if (entries.Count == 0)
+                    throw new InvalidOperationException("No icon entries in group.");
+
+                var iconImages = new List<IconResource>();
+                foreach (var entry in entries)
+                {
+                    byte[] iconImage = LoadResourceData(hModule, RT_ICON, new IntPtr(entry.ResourceId));
+                    if (iconImage != null && iconImage.Length > 0)
+                    {
+                        iconImages.Add(new IconResource { Entry = entry, ImageData = iconImage });
+                    }
+                }
+
+                if (iconImages.Count == 0)
                     throw new InvalidOperationException("Icon image resource not found.");
 
-                return BuildSingleIconIco(chosen, iconImage);
+                GroupIconEntry best = SelectBestEntry(entries, 256);
+                IconResource bestIcon = iconImages.Find(i => i.Entry.ResourceId == best.ResourceId) ?? iconImages[0];
+
+                byte[] fullIcon = BuildMultiIconIco(iconImages);
+                byte[] previewIcon = BuildSingleIconIco(bestIcon.Entry, bestIcon.ImageData);
+
+                return new IconExtractionResult
+                {
+                    FullIcoBytes = fullIcon,
+                    PreviewIcoBytes = previewIcon
+                };
             }
             finally
             {
@@ -67,21 +84,15 @@ namespace philips_protector
             }
         }
 
-        private static GroupIconEntry SelectBestEntry(byte[] groupData, int preferredSize)
+        private static List<GroupIconEntry> ParseGroupEntries(byte[] groupData)
         {
-            // ICONDIR header: 6 bytes. Then N entries of 14 bytes.
+            var entries = new List<GroupIconEntry>();
             using (var ms = new MemoryStream(groupData))
             using (var br = new BinaryReader(ms))
             {
                 br.ReadUInt16(); // reserved
                 br.ReadUInt16(); // type
                 ushort count = br.ReadUInt16();
-                if (count == 0)
-                    throw new InvalidOperationException("No icon entries in group.");
-
-                GroupIconEntry best = default(GroupIconEntry);
-                int bestScore = int.MaxValue;
-
                 for (int i = 0; i < count; i++)
                 {
                     GroupIconEntry entry = new GroupIconEntry();
@@ -93,20 +104,29 @@ namespace philips_protector
                     entry.BitCount = br.ReadUInt16();
                     entry.BytesInRes = br.ReadUInt32();
                     entry.ResourceId = br.ReadUInt16();
-
-                    int w = entry.Width == 0 ? 256 : entry.Width;
-                    int h = entry.Height == 0 ? 256 : entry.Height;
-                    int sizeAvg = (w + h) / 2;
-                    int score = Math.Abs(sizeAvg - preferredSize);
-                    if (score < bestScore)
-                    {
-                        bestScore = score;
-                        best = entry;
-                    }
+                    entries.Add(entry);
                 }
-
-                return best;
             }
+            return entries;
+        }
+
+        private static GroupIconEntry SelectBestEntry(List<GroupIconEntry> entries, int preferredSize)
+        {
+            GroupIconEntry best = entries[0];
+            int bestScore = int.MaxValue;
+            foreach (var entry in entries)
+            {
+                int w = entry.Width == 0 ? 256 : entry.Width;
+                int h = entry.Height == 0 ? 256 : entry.Height;
+                int sizeAvg = (w + h) / 2;
+                int score = Math.Abs(sizeAvg - preferredSize);
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    best = entry;
+                }
+            }
+            return best;
         }
 
         private static byte[] BuildSingleIconIco(GroupIconEntry entry, byte[] imageData)
@@ -114,12 +134,10 @@ namespace philips_protector
             using (var ms = new MemoryStream())
             using (var bw = new BinaryWriter(ms))
             {
-                // ICONDIR
-                bw.Write((ushort)0); // reserved
-                bw.Write((ushort)1); // type = icon
-                bw.Write((ushort)1); // count
+                bw.Write((ushort)0);
+                bw.Write((ushort)1);
+                bw.Write((ushort)1);
 
-                // ICONDIRENTRY
                 bw.Write(entry.Width);
                 bw.Write(entry.Height);
                 bw.Write(entry.ColorCount);
@@ -127,10 +145,42 @@ namespace philips_protector
                 bw.Write(entry.Planes);
                 bw.Write(entry.BitCount);
                 bw.Write((uint)imageData.Length);
-                bw.Write((uint)(6 + 16)); // offset to image data
+                bw.Write((uint)(6 + 16));
 
-                // Image data
                 bw.Write(imageData);
+                bw.Flush();
+                return ms.ToArray();
+            }
+        }
+
+        private static byte[] BuildMultiIconIco(List<IconResource> icons)
+        {
+            using (var ms = new MemoryStream())
+            using (var bw = new BinaryWriter(ms))
+            {
+                bw.Write((ushort)0);
+                bw.Write((ushort)1);
+                bw.Write((ushort)icons.Count);
+
+                int offset = 6 + (16 * icons.Count);
+                foreach (var icon in icons)
+                {
+                    bw.Write((byte)(icon.Entry.Width == 256 ? 0 : icon.Entry.Width));
+                    bw.Write((byte)(icon.Entry.Height == 256 ? 0 : icon.Entry.Height));
+                    bw.Write(icon.Entry.ColorCount);
+                    bw.Write(icon.Entry.Reserved);
+                    bw.Write(icon.Entry.Planes);
+                    bw.Write(icon.Entry.BitCount);
+                    bw.Write((uint)icon.ImageData.Length);
+                    bw.Write((uint)offset);
+                    offset += icon.ImageData.Length;
+                }
+
+                foreach (var icon in icons)
+                {
+                    bw.Write(icon.ImageData);
+                }
+
                 bw.Flush();
                 return ms.ToArray();
             }
@@ -166,6 +216,18 @@ namespace philips_protector
             public ushort BitCount;
             public uint BytesInRes;
             public ushort ResourceId;
+        }
+
+        private class IconResource
+        {
+            public GroupIconEntry Entry { get; set; }
+            public byte[] ImageData { get; set; }
+        }
+
+        public class IconExtractionResult
+        {
+            public byte[] FullIcoBytes { get; set; }
+            public byte[] PreviewIcoBytes { get; set; }
         }
 
         private delegate bool EnumResNameDelegate(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam);

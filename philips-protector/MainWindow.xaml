@@ -111,14 +111,8 @@
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Icon Size:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <ComboBox x:Name="IconSizeComboBox" Width="120" SelectedIndex="3">
-                                <ComboBoxItem Content="16" />
-                                <ComboBoxItem Content="32" />
-                                <ComboBoxItem Content="48" />
-                                <ComboBoxItem Content="256" />
-                            </ComboBox>
-                            <Button x:Name="ExtractIconButton" Content="Extract Icon" Width="100" Margin="10,0,0,0" Click="ExtractIconButton_Click"/>
+                            <Button x:Name="ExtractIconButton" Content="Extract Icon Group" Width="140" Click="ExtractIconButton_Click"/>
+                            <TextBlock Text="Uses the icon group embedded in the EXE." Margin="10,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
@@ -141,7 +135,7 @@
                             <Button x:Name="SelectReplaceExeButton" Content="Browse..." Width="80" Click="SelectReplaceExeButton_Click"/>
                         </StackPanel>
 
-                        <TextBlock Text="Icon File (ICO/PNG/BMP):" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <TextBlock Text="Icon Source (ICO/EXE/PNG/BMP):" FontWeight="SemiBold" Margin="0,10,0,5"/>
                         <StackPanel Orientation="Horizontal">
                             <TextBox x:Name="ReplaceIconPathTextBox" Width="230" IsReadOnly="True" Margin="0,0,8,0"/>
                             <Button x:Name="SelectIconFileButton" Content="Browse..." Width="80" Click="SelectIconFileButton_Click"/>
