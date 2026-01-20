@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -25,7 +26,7 @@ namespace philips_protector_spy
                 if (!File.Exists(licenseFilePath))
                 {
                     MessageBox.Show(
-                        $"License file not found: {LICENSE_FILE_NAME}\n\nPlease ensure the license file is in the same folder as the application.",
+                        "License file not found: " + LICENSE_FILE_NAME + "\n\nPlease ensure the license file is in the same folder as the application.",
                         "License File Not Found",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
@@ -65,7 +66,7 @@ namespace philips_protector_spy
                 if (!File.Exists(executableFilePath))
                 {
                     MessageBox.Show(
-                        $"Executable file not found: {EXECUTABLE_FILE_NAME}\n\nPlease ensure the executable file is in the same folder as the application.",
+                        "Executable file not found: " + EXECUTABLE_FILE_NAME + "\n\nPlease ensure the executable file is in the same folder as the application.",
                         "Executable File Not Found",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
@@ -123,7 +124,7 @@ namespace philips_protector_spy
                             ProcessStartInfo startInfo = new ProcessStartInfo
                             {
                                 FileName = "cmd.exe",
-                                Arguments = $"/c \"{executableFilePath}\"",
+                                Arguments = "/c \"" + executableFilePath + "\"",
                                 WorkingDirectory = appDirectory,
                                 UseShellExecute = false,
                                 CreateNoWindow = true,
@@ -143,14 +144,14 @@ namespace philips_protector_spy
                 if (!executionSuccess && lastException != null)
                 {
                     // Show detailed error for debugging
-                    string errorDetails = $"Error Type: {lastException.GetType().Name}\n" +
-                                        $"Message: {lastException.Message}\n" +
-                                        $"File Path: {executableFilePath}\n" +
-                                        $"File Exists: {File.Exists(executableFilePath)}\n" +
-                                        $"File Size: {(File.Exists(executableFilePath) ? new FileInfo(executableFilePath).Length : 0)} bytes";
+                    string errorDetails = "Error Type: " + lastException.GetType().Name + "\n" +
+                                        "Message: " + lastException.Message + "\n" +
+                                        "File Path: " + executableFilePath + "\n" +
+                                        "File Exists: " + File.Exists(executableFilePath) + "\n" +
+                                        "File Size: " + (File.Exists(executableFilePath) ? new FileInfo(executableFilePath).Length.ToString() : "0") + " bytes";
 
                     MessageBox.Show(
-                        $"Error executing {EXECUTABLE_FILE_NAME}:\n\n{errorDetails}\n\nPlease ensure the file is a valid executable.",
+                        "Error executing " + EXECUTABLE_FILE_NAME + ":\n\n" + errorDetails + "\n\nPlease ensure the file is a valid executable.",
                         "Execution Error",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
@@ -162,7 +163,7 @@ namespace philips_protector_spy
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"An unexpected error occurred:\n{ex.Message}",
+                    "An unexpected error occurred:\n" + ex.Message,
                     "Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);

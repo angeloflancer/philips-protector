@@ -17,7 +17,7 @@ namespace philips_protector_spy
             if (string.IsNullOrWhiteSpace(licenseKey))
                 return false;
 
-            // Normalize the input: remove dashes and convert to uppercase
+            // Normalize the input: remove whitespace and dashes (if any)
             string normalizedKey = NormalizeLicenseKey(licenseKey);
 
             // Get current hardware fingerprint
@@ -32,11 +32,13 @@ namespace philips_protector_spy
         }
 
         /// <summary>
-        /// Normalizes a license key by removing dashes and converting to uppercase
+        /// Normalizes a Base64 license key by removing whitespace and dashes (if any)
+        /// Base64 is case-sensitive, so we preserve the original case
         /// </summary>
         private static string NormalizeLicenseKey(string licenseKey)
         {
-            return licenseKey.Replace("-", "").Replace(" ", "").ToUpperInvariant().Trim();
+            // Remove whitespace, dashes, and spaces that might have been added for readability
+            return licenseKey.Replace("-", "").Replace(" ", "").Replace("\t", "").Replace("\n", "").Replace("\r", "").Trim();
         }
 
         /// <summary>
