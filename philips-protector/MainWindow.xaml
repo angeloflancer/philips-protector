@@ -29,9 +29,9 @@
                        FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
 
             <!-- Hardware Fingerprint Section -->
-            <GroupBox Grid.Row="1" Header="Hardware Fingerprint" Margin="0,0,0,15">
+            <GroupBox Grid.Row="1" Header="Hardware License Key" Margin="0,0,0,15">
                 <StackPanel Margin="10">
-                    <TextBlock Text="Current System Fingerprint:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Current Hardware License Key:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                     <TextBox x:Name="FingerprintTextBox" IsReadOnly="True" 
                              TextWrapping="Wrap" 
                              Background="#F5F5F5"
@@ -39,7 +39,7 @@
                              MinHeight="60"
                              VerticalScrollBarVisibility="Auto"/>
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                        <Button x:Name="CopyFingerprintButton" Content="Copy Fingerprint" 
+                        <Button x:Name="CopyFingerprintButton" Content="Copy License Key" 
                                 Click="CopyFingerprintButton_Click"
                                 Padding="10,5"
                                 Margin="0,0,10,0"/>
@@ -99,53 +99,25 @@
             </GroupBox>
         </Grid>
 
-        <!-- Right column: Icon manager -->
+        <!-- Right column: Protect via Spy -->
         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="20,0,0,0">
-                <GroupBox Header="Extract Icon" Margin="0,0,0,15">
+                <GroupBox Header="Protect via Spy" Margin="0,0,0,15">
                     <StackPanel Margin="10">
-                        <TextBlock Text="Select EXE:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBlock Text="Target Executable:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <StackPanel Orientation="Horizontal">
-                            <TextBox x:Name="ExtractExePathTextBox" Width="230" IsReadOnly="True" Margin="0,0,8,0"/>
-                            <Button x:Name="SelectExtractExeButton" Content="Browse..." Width="80" Click="SelectExtractExeButton_Click"/>
+                            <TextBox x:Name="TargetExePathTextBox" Width="230" IsReadOnly="True" Margin="0,0,8,0"/>
+                            <Button x:Name="SelectTargetExeButton" Content="Browse..." Width="80" Click="SelectTargetExeButton_Click"/>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
-                            <Button x:Name="ExtractIconButton" Content="Extract Icon Group" Width="140" Click="ExtractIconButton_Click"/>
-                            <TextBlock Text="Uses the icon group embedded in the EXE." Margin="10,0,0,0" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <Button x:Name="ProtectViaSpyButton" Content="Protect via Spy" 
+                                Width="140" 
+                                Margin="0,15,0,0" 
+                                Padding="10,8"
+                                FontWeight="SemiBold"
+                                Click="ProtectViaSpyButton_Click"/>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <Image x:Name="IconPreviewImage" Width="64" Height="64" Stretch="Uniform"/>
-                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-                                <Button x:Name="SaveIconToFolderButton" Content="Save to Folder..." Width="120" Margin="0,0,8,0" Click="SaveIconToFolderButton_Click"/>
-                                <Button x:Name="SaveIconToTempButton" Content="Save to Temp" Width="100" Click="SaveIconToTempButton_Click"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <TextBlock x:Name="IconExtractStatusTextBlock" Margin="0,8,0,0" Foreground="#2E7D32"/>
-                    </StackPanel>
-                </GroupBox>
-
-                <GroupBox Header="Replace Icon">
-                    <StackPanel Margin="10">
-                        <TextBlock Text="Target EXE:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox x:Name="ReplaceExePathTextBox" Width="230" IsReadOnly="True" Margin="0,0,8,0"/>
-                            <Button x:Name="SelectReplaceExeButton" Content="Browse..." Width="80" Click="SelectReplaceExeButton_Click"/>
-                        </StackPanel>
-
-                        <TextBlock Text="Icon Source (ICO/EXE/PNG/BMP):" FontWeight="SemiBold" Margin="0,10,0,5"/>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox x:Name="ReplaceIconPathTextBox" Width="230" IsReadOnly="True" Margin="0,0,8,0"/>
-                            <Button x:Name="SelectIconFileButton" Content="Browse..." Width="80" Click="SelectIconFileButton_Click"/>
-                        </StackPanel>
-
-                        <CheckBox x:Name="UseTempIconCheckBox" Content="Use temp icon (if saved)" Margin="0,10,0,0" Checked="UseTempIconCheckBox_Checked" Unchecked="UseTempIconCheckBox_Unchecked"/>
-
-                        <Button x:Name="ReplaceIconButton" Content="Replace Icon" Width="120" Margin="0,10,0,0" Click="ReplaceIconButton_Click"/>
-
-                        <TextBlock x:Name="IconReplaceStatusTextBlock" Margin="0,8,0,0" Foreground="#2E7D32"/>
+                        <TextBlock x:Name="ProtectStatusTextBlock" Margin="0,10,0,0" Foreground="#2E7D32" TextWrapping="Wrap"/>
                     </StackPanel>
                 </GroupBox>
             </StackPanel>

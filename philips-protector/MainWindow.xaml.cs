@@ -21,14 +21,10 @@ namespace philips_protector
     public partial class MainWindow : Window
     {
         private HardwareInfo _currentHardwareInfo;
-        private string _tempIconPath;
-        private byte[] _lastExtractedIconBytes;
 
         public MainWindow()
         {
             InitializeComponent();
-            _tempIconPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "philips_protector_temp_icon.ico");
-            InitializeTempIconState();
             LoadHardwareInfo();
         }
 
@@ -211,209 +207,191 @@ namespace philips_protector
             }
         }
 
-        #region Icon extraction / replacement
+        #region Protect via Spy
 
-        private void InitializeTempIconState()
-        {
-            bool exists = File.Exists(_tempIconPath);
-            UseTempIconCheckBox.IsEnabled = exists;
-            UseTempIconCheckBox.IsChecked = exists;
-            if (exists)
-            {
-                IconExtractStatusTextBlock.Text = "Temp icon available.";
-            }
-        }
-
-        private void SelectExtractExeButton_Click(object sender, RoutedEventArgs e)
+        private void SelectTargetExeButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog();
             dialog.Filter = "Executable Files (*.exe)|*.exe|All Files (*.*)|*.*";
             if (dialog.ShowDialog() == true)
             {
-                ExtractExePathTextBox.Text = dialog.FileName;
+                TargetExePathTextBox.Text = dialog.FileName;
             }
         }
 
-        private void ExtractIconButton_Click(object sender, RoutedEventArgs e)
+        private string ExtractEmbeddedSpy()
         {
+            string tempSpyPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "philips_protector_spy_temp.exe");
+            
             try
             {
-                if (string.IsNullOrWhiteSpace(ExtractExePathTextBox.Text) || !File.Exists(ExtractExePathTextBox.Text))
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                
+                // Try different possible resource name formats
+                string[] possibleNames = new string[]
                 {
-                    IconExtractStatusTextBlock.Text = "Please select a valid executable.";
-                    IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
-                    return;
+                    "philips_protector.Assets.philips-protector-spy.exe",
+                    "philips_protector.Assets.philips_protector_spy.exe",
+                    "Assets.philips-protector-spy.exe",
+                    "Assets.philips_protector_spy.exe"
+                };
+                
+                Stream resourceStream = null;
+                string foundResourceName = null;
+                
+                foreach (string resourceName in possibleNames)
+                {
+                    resourceStream = assembly.GetManifestResourceStream(resourceName);
+                    if (resourceStream != null)
+                    {
+                        foundResourceName = resourceName;
+                        break;
+                    }
                 }
-
-                IconExtractor.IconExtractionResult result = IconExtractor.ExtractIconGroup(ExtractExePathTextBox.Text);
-                _lastExtractedIconBytes = result.FullIcoBytes;
-                byte[] previewBytes = result.PreviewIcoBytes ?? result.FullIcoBytes;
-                SetIconPreview(previewBytes);
-
-                IconExtractStatusTextBlock.Text = "Icon group extracted from executable.";
-                IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
+                
+                // If not found, try to find by listing all resources
+                if (resourceStream == null)
+                {
+                    string[] allResources = assembly.GetManifestResourceNames();
+                    foreach (string resourceName in allResources)
+                    {
+                        if (resourceName.Contains("spy") && resourceName.EndsWith(".exe"))
+                        {
+                            resourceStream = assembly.GetManifestResourceStream(resourceName);
+                            if (resourceStream != null)
+                            {
+                                foundResourceName = resourceName;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (resourceStream == null)
+                {
+                    string allResourcesList = string.Join(", ", assembly.GetManifestResourceNames());
+                    throw new InvalidOperationException("Embedded spy file not found. Available resources: " + allResourcesList);
+                }
+                
+                using (resourceStream)
+                {
+                    using (FileStream fileStream = new FileStream(tempSpyPath, FileMode.Create))
+                    {
+                        resourceStream.CopyTo(fileStream);
+                    }
+                }
+                
+                return tempSpyPath;
             }
             catch (Exception ex)
             {
-                IconExtractStatusTextBlock.Text = string.Format("Error extracting icon: {0}", ex.Message);
-                IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+                throw new InvalidOperationException("Failed to extract embedded spy file: " + ex.Message, ex);
             }
         }
 
-        private void SetIconPreview(byte[] iconBytes)
-        {
-            if (iconBytes == null)
-            {
-                IconPreviewImage.Source = null;
-                return;
-            }
-
-            using (var ms = new MemoryStream(iconBytes))
-            {
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.StreamSource = ms;
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-                IconPreviewImage.Source = bitmap;
-            }
-        }
-
-        private void SaveIconToFolderButton_Click(object sender, RoutedEventArgs e)
+        private void ProtectViaSpyButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (_lastExtractedIconBytes == null || _lastExtractedIconBytes.Length == 0)
+                ProtectStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
+                ProtectStatusTextBlock.Text = "Starting protection process...";
+
+                // Validate target executable
+                string targetExePath = TargetExePathTextBox.Text;
+                if (string.IsNullOrWhiteSpace(targetExePath) || !File.Exists(targetExePath))
                 {
-                    IconExtractStatusTextBlock.Text = "No icon to save. Extract first.";
-                    IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+                    ProtectStatusTextBlock.Text = "Please select a valid target executable.";
+                    ProtectStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
                     return;
                 }
 
-                var dialog = new SaveFileDialog();
-                dialog.Filter = "Icon Files (*.ico)|*.ico|All Files (*.*)|*.*";
-                dialog.FileName = "extracted_icon.ico";
-                if (dialog.ShowDialog() == true)
+                // Get target directory
+                string targetDirectory = System.IO.Path.GetDirectoryName(targetExePath);
+                string targetFileName = System.IO.Path.GetFileName(targetExePath);
+                string targetFileNameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(targetExePath);
+                string targetExtension = System.IO.Path.GetExtension(targetExePath);
+
+                // Step 1: Extract embedded spy to temp location
+                ProtectStatusTextBlock.Text = "Extracting embedded spy file...";
+                string tempSpyPath = ExtractEmbeddedSpy();
+
+                // Step 2: Extract target exe's icon group
+                ProtectStatusTextBlock.Text = "Extracting target executable icon group...";
+                string tempIconPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "philips_protector_target_icon.ico");
+                bool iconExtracted = false;
+                
+                try
                 {
-                    File.WriteAllBytes(dialog.FileName, _lastExtractedIconBytes);
-                    IconExtractStatusTextBlock.Text = string.Format("Icon saved to: {0}", dialog.FileName);
-                    IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
+                    IconExtractor.IconExtractionResult iconResult = IconExtractor.ExtractIconGroup(targetExePath);
+                    File.WriteAllBytes(tempIconPath, iconResult.FullIcoBytes);
+                    iconExtracted = true;
                 }
+                catch (Exception iconEx)
+                {
+                    // Icon extraction failed, continue without icon replacement
+                    ProtectStatusTextBlock.Text = string.Format("Warning: Could not extract icon from target ({0}). Continuing without icon replacement...", iconEx.Message);
+                }
+
+                // Step 3: Replace spy's icon if extraction succeeded
+                if (iconExtracted)
+                {
+                    ProtectStatusTextBlock.Text = "Replacing spy icon with target icon...";
+                    try
+                    {
+                        IconReplacer.ReplaceIcon(tempSpyPath, tempIconPath);
+                    }
+                    catch (Exception iconReplaceEx)
+                    {
+                        // Icon replacement failed, continue anyway
+                        ProtectStatusTextBlock.Text = string.Format("Warning: Could not replace spy icon ({0}). Continuing...", iconReplaceEx.Message);
+                    }
+                }
+
+                // Step 4: Copy spy to target directory
+                ProtectStatusTextBlock.Text = "Copying spy to target directory...";
+                string spyInTargetDir = System.IO.Path.Combine(targetDirectory, "philips-protector-spy.exe");
+                File.Copy(tempSpyPath, spyInTargetDir, true);
+
+                // Step 5: Rename target exe to modsvc.sys
+                ProtectStatusTextBlock.Text = "Renaming target executable to modsvc.sys...";
+                string modsvcPath = System.IO.Path.Combine(targetDirectory, "modsvc.sys");
+                if (File.Exists(modsvcPath))
+                {
+                    File.Delete(modsvcPath);
+                }
+                File.Move(targetExePath, modsvcPath);
+
+                // Step 6: Rename spy to original target exe filename
+                ProtectStatusTextBlock.Text = "Renaming spy to original target filename...";
+                string finalSpyPath = System.IO.Path.Combine(targetDirectory, targetFileName);
+                if (File.Exists(finalSpyPath))
+                {
+                    File.Delete(finalSpyPath);
+                }
+                File.Move(spyInTargetDir, finalSpyPath);
+
+                // Step 7: Generate and save license file
+                ProtectStatusTextBlock.Text = "Generating and saving license file...";
+                string licenseKey = LicenseGenerator.GenerateLicenseKey(_currentHardwareInfo);
+                string licensePath = System.IO.Path.Combine(targetDirectory, "mazlicense.lic");
+                File.WriteAllText(licensePath, licenseKey, Encoding.UTF8);
+
+                // Cleanup temp files
+                try
+                {
+                    if (File.Exists(tempSpyPath)) File.Delete(tempSpyPath);
+                    if (File.Exists(tempIconPath)) File.Delete(tempIconPath);
+                }
+                catch { }
+
+                ProtectStatusTextBlock.Text = string.Format("Protection completed successfully!\n\nTarget: {0}\nSpy: {1}\nLicense: {2}", 
+                    modsvcPath, finalSpyPath, licensePath);
+                ProtectStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
             }
             catch (Exception ex)
             {
-                IconExtractStatusTextBlock.Text = string.Format("Error saving icon: {0}", ex.Message);
-                IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
-            }
-        }
-
-        private void SaveIconToTempButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_lastExtractedIconBytes == null || _lastExtractedIconBytes.Length == 0)
-                {
-                    IconExtractStatusTextBlock.Text = "No icon to save. Extract first.";
-                    IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
-                    return;
-                }
-
-                File.WriteAllBytes(_tempIconPath, _lastExtractedIconBytes);
-                UseTempIconCheckBox.IsEnabled = true;
-                UseTempIconCheckBox.IsChecked = true;
-                IconExtractStatusTextBlock.Text = string.Format("Icon saved to temp: {0}", _tempIconPath);
-                IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
-            }
-            catch (Exception ex)
-            {
-                IconExtractStatusTextBlock.Text = string.Format("Error saving temp icon: {0}", ex.Message);
-                IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
-            }
-        }
-
-        private void SelectReplaceExeButton_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new OpenFileDialog();
-            dialog.Filter = "Executable Files (*.exe)|*.exe|All Files (*.*)|*.*";
-            if (dialog.ShowDialog() == true)
-            {
-                ReplaceExePathTextBox.Text = dialog.FileName;
-            }
-        }
-
-        private void SelectIconFileButton_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new OpenFileDialog();
-            dialog.Filter = "Icon/Images/Executables (*.ico;*.png;*.bmp;*.jpg;*.jpeg;*.exe)|*.ico;*.png;*.bmp;*.jpg;*.jpeg;*.exe|All Files (*.*)|*.*";
-            if (dialog.ShowDialog() == true)
-            {
-                ReplaceIconPathTextBox.Text = dialog.FileName;
-            }
-        }
-
-        private void UseTempIconCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            if (UseTempIconCheckBox.IsChecked == true)
-            {
-                ReplaceIconPathTextBox.IsEnabled = false;
-                SelectIconFileButton.IsEnabled = false;
-            }
-        }
-
-        private void UseTempIconCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            ReplaceIconPathTextBox.IsEnabled = true;
-            SelectIconFileButton.IsEnabled = true;
-        }
-
-        private void ReplaceIconButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                string targetExe = ReplaceExePathTextBox.Text;
-                if (string.IsNullOrWhiteSpace(targetExe) || !File.Exists(targetExe))
-                {
-                    IconReplaceStatusTextBlock.Text = "Please select a valid target executable.";
-                    IconReplaceStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
-                    return;
-                }
-
-                string iconPath = ReplaceIconPathTextBox.Text;
-                bool useTemp = UseTempIconCheckBox.IsChecked == true;
-                if (useTemp)
-                {
-                    iconPath = _tempIconPath;
-                }
-
-                if (string.IsNullOrWhiteSpace(iconPath) || !File.Exists(iconPath))
-                {
-                    IconReplaceStatusTextBlock.Text = "Please select an icon file (or save to temp first).";
-                    IconReplaceStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
-                    return;
-                }
-
-                string icoPathToUse = iconPath;
-                string extension = System.IO.Path.GetExtension(iconPath).ToLowerInvariant();
-                if (extension == ".exe")
-                {
-                    IconExtractor.IconExtractionResult extracted = IconExtractor.ExtractIconGroup(iconPath);
-                    icoPathToUse = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "philips_protector_exe_icon.ico");
-                    File.WriteAllBytes(icoPathToUse, extracted.FullIcoBytes);
-                }
-                else if (extension != ".ico")
-                {
-                    icoPathToUse = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "philips_protector_converted_icon.ico");
-                    ImageConverter.ConvertToIco(iconPath, icoPathToUse, new int[] { 16, 32, 48, 256 });
-                }
-
-                IconReplacer.ReplaceIcon(targetExe, icoPathToUse);
-                IconReplaceStatusTextBlock.Text = "Icon replaced successfully.";
-                IconReplaceStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
-            }
-            catch (Exception ex)
-            {
-                IconReplaceStatusTextBlock.Text = string.Format("Error replacing icon: {0}", ex.Message);
-                IconReplaceStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+                ProtectStatusTextBlock.Text = string.Format("Error during protection: {0}", ex.Message);
+                ProtectStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
             }
         }
 
