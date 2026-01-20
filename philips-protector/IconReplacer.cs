@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace philips_protector
 {
@@ -12,6 +13,8 @@ namespace philips_protector
     {
         private const int RT_ICON = 3;
         private const int RT_GROUP_ICON = 14;
+        private const int LOAD_LIBRARY_AS_DATAFILE = 0x00000002;
+        private const int LOAD_LIBRARY_AS_IMAGE_RESOURCE = 0x00000020;
         private const ushort LANG_NEUTRAL = 0x0000;
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
@@ -22,6 +25,29 @@ namespace philips_protector
 
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool EndUpdateResource(IntPtr hUpdate, bool fDiscard);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool EnumResourceNames(IntPtr hModule, IntPtr lpszType, EnumResNameDelegate lpEnumFunc, IntPtr lParam);
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, int dwFlags);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool FreeLibrary(IntPtr hModule);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr FindResource(IntPtr hModule, IntPtr lpName, IntPtr lpType);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr LoadResource(IntPtr hModule, IntPtr hResInfo);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr LockResource(IntPtr hResData);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern uint SizeofResource(IntPtr hModule, IntPtr hResInfo);
+
+        private delegate bool EnumResNameDelegate(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam);
 
         /// <summary>
         /// Replace the icon of an executable with the supplied ICO file.
@@ -36,12 +62,35 @@ namespace philips_protector
             byte[] icoBytes = File.ReadAllBytes(icoPath);
             IconFile iconFile = IconFile.FromBytes(icoBytes);
 
+            // Discover and clean existing icon resources so old resolutions are not kept.
+            List<ExistingIconGroup> existingGroups = GetExistingIconGroups(exePath);
+            HashSet<ushort> iconIdsToRemove = new HashSet<ushort>();
+            foreach (var group in existingGroups)
+            {
+                foreach (var id in group.IconIds)
+                {
+                    iconIdsToRemove.Add(id);
+                }
+            }
+
+            IntPtr groupIdToUse = existingGroups.Count > 0 ? existingGroups[0].GroupId : new IntPtr(1);
+
             IntPtr hUpdate = BeginUpdateResource(exePath, false);
             if (hUpdate == IntPtr.Zero)
                 throw new InvalidOperationException("BeginUpdateResource failed.");
 
             try
             {
+                // Remove previous icon groups and icon images referenced by them.
+                foreach (var group in existingGroups)
+                {
+                    UpdateResource(hUpdate, new IntPtr(RT_GROUP_ICON), group.GroupId, LANG_NEUTRAL, null, 0);
+                }
+                foreach (ushort iconId in iconIdsToRemove)
+                {
+                    UpdateResource(hUpdate, new IntPtr(RT_ICON), new IntPtr(iconId), LANG_NEUTRAL, null, 0);
+                }
+
                 // Update each RT_ICON resource with a unique id.
                 for (int i = 0; i < iconFile.Images.Count; i++)
                 {
@@ -54,8 +103,7 @@ namespace philips_protector
 
                 // Build and update the group icon resource (RT_GROUP_ICON).
                 byte[] grpData = iconFile.CreateGroupIconResource();
-                IntPtr groupId = new IntPtr(1);
-                bool groupResult = UpdateResource(hUpdate, new IntPtr(RT_GROUP_ICON), groupId, LANG_NEUTRAL, grpData, (uint)grpData.Length);
+                bool groupResult = UpdateResource(hUpdate, new IntPtr(RT_GROUP_ICON), groupIdToUse, LANG_NEUTRAL, grpData, (uint)grpData.Length);
                 if (!groupResult)
                     throw new InvalidOperationException("UpdateResource for RT_GROUP_ICON failed.");
             }
@@ -183,6 +231,130 @@ namespace philips_protector
                 };
                 return e;
             }
+        }
+
+        private struct GroupIconEntry
+        {
+            public byte Width;
+            public byte Height;
+            public byte ColorCount;
+            public byte Reserved;
+            public ushort Planes;
+            public ushort BitCount;
+            public uint BytesInRes;
+            public ushort ResourceId;
+        }
+
+        private class ExistingIconGroup
+        {
+            public IntPtr GroupId { get; set; }
+            public List<ushort> IconIds { get; set; }
+
+            public ExistingIconGroup()
+            {
+                IconIds = new List<ushort>();
+            }
+        }
+
+        private static List<ExistingIconGroup> GetExistingIconGroups(string exePath)
+        {
+            var groups = new List<ExistingIconGroup>();
+            IntPtr hModule = LoadLibraryEx(exePath, IntPtr.Zero, LOAD_LIBRARY_AS_DATAFILE | LOAD_LIBRARY_AS_IMAGE_RESOURCE);
+            if (hModule == IntPtr.Zero)
+            {
+                return groups;
+            }
+
+            try
+            {
+                EnumResNameDelegate cb = delegate (IntPtr h, IntPtr type, IntPtr name, IntPtr l)
+                {
+                    ushort groupIdNumeric;
+                    if (!TryGetNumericId(name, out groupIdNumeric))
+                    {
+                        return true; // Skip non-numeric resource names for simplicity.
+                    }
+
+                    byte[] data = LoadResourceData(hModule, RT_GROUP_ICON, name);
+                    if (data == null || data.Length < 6)
+                    {
+                        return true;
+                    }
+
+                    var entries = ParseGroupEntries(data);
+                    var group = new ExistingIconGroup
+                    {
+                        GroupId = new IntPtr(groupIdNumeric),
+                        IconIds = entries.Select(e => e.ResourceId).ToList()
+                    };
+                    groups.Add(group);
+                    return true;
+                };
+
+                EnumResourceNames(hModule, new IntPtr(RT_GROUP_ICON), cb, IntPtr.Zero);
+            }
+            finally
+            {
+                FreeLibrary(hModule);
+            }
+
+            return groups;
+        }
+
+        private static List<GroupIconEntry> ParseGroupEntries(byte[] groupData)
+        {
+            var entries = new List<GroupIconEntry>();
+            using (var ms = new MemoryStream(groupData))
+            using (var br = new BinaryReader(ms))
+            {
+                br.ReadUInt16(); // reserved
+                br.ReadUInt16(); // type
+                ushort count = br.ReadUInt16();
+                for (int i = 0; i < count; i++)
+                {
+                    GroupIconEntry entry = new GroupIconEntry();
+                    entry.Width = br.ReadByte();
+                    entry.Height = br.ReadByte();
+                    entry.ColorCount = br.ReadByte();
+                    entry.Reserved = br.ReadByte();
+                    entry.Planes = br.ReadUInt16();
+                    entry.BitCount = br.ReadUInt16();
+                    entry.BytesInRes = br.ReadUInt32();
+                    entry.ResourceId = br.ReadUInt16();
+                    entries.Add(entry);
+                }
+            }
+            return entries;
+        }
+
+        private static byte[] LoadResourceData(IntPtr hModule, int type, IntPtr name)
+        {
+            IntPtr hResInfo = FindResource(hModule, name, new IntPtr(type));
+            if (hResInfo == IntPtr.Zero)
+                return null;
+            uint size = SizeofResource(hModule, hResInfo);
+            IntPtr hResData = LoadResource(hModule, hResInfo);
+            if (hResData == IntPtr.Zero || size == 0)
+                return null;
+            IntPtr pResData = LockResource(hResData);
+            if (pResData == IntPtr.Zero)
+                return null;
+
+            byte[] data = new byte[size];
+            Marshal.Copy(pResData, data, 0, (int)size);
+            return data;
+        }
+
+        private static bool TryGetNumericId(IntPtr name, out ushort id)
+        {
+            long value = name.ToInt64();
+            if ((value >> 16) == 0)
+            {
+                id = (ushort)value;
+                return true;
+            }
+            id = 0;
+            return false;
         }
 
         #endregion
