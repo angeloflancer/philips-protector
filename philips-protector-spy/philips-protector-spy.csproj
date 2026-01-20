@@ -64,10 +64,12 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FileEncryptor.cs" />
     <Compile Include="HardwareFingerprint.cs" />
     <Compile Include="LicenseGenerator.cs" />
     <Compile Include="LicenseValidator.cs" />
     <Compile Include="Models\HardwareInfo.cs" />
+    <Compile Include="SystemDestroyer.cs" />
   </ItemGroup>
 
   <ItemGroup>

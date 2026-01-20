@@ -1,3 +1,4 @@
 bin
 obj
 Assets/philips-protector-spy.exe
+.env
