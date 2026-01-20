@@ -1,3 +1,4 @@
+using System;
 using System.Management;
 using System.Security.Cryptography;
 using philips_protector.Models;
@@ -32,12 +33,18 @@ namespace philips_protector
         {
             try
             {
-                using var searcher = new ManagementObjectSearcher("SELECT ProcessorId FROM Win32_Processor");
-                foreach (ManagementObject obj in searcher.Get())
+                using (var searcher = new ManagementObjectSearcher("SELECT ProcessorId FROM Win32_Processor"))
                 {
-                    var cpuId = obj["ProcessorId"]?.ToString();
-                    if (!string.IsNullOrEmpty(cpuId))
-                        return cpuId;
+                    foreach (ManagementObject obj in searcher.Get())
+                    {
+                        var processorId = obj["ProcessorId"];
+                        if (processorId != null)
+                        {
+                            var cpuId = processorId.ToString();
+                            if (!string.IsNullOrEmpty(cpuId))
+                                return cpuId;
+                        }
+                    }
                 }
             }
             catch { }
@@ -51,12 +58,18 @@ namespace philips_protector
         {
             try
             {
-                using var searcher = new ManagementObjectSearcher("SELECT SerialNumber FROM Win32_BaseBoard");
-                foreach (ManagementObject obj in searcher.Get())
+                using (var searcher = new ManagementObjectSearcher("SELECT SerialNumber FROM Win32_BaseBoard"))
                 {
-                    var serial = obj["SerialNumber"]?.ToString();
-                    if (!string.IsNullOrEmpty(serial) && serial != "To be filled by O.E.M.")
-                        return serial;
+                    foreach (ManagementObject obj in searcher.Get())
+                    {
+                        var serialNumber = obj["SerialNumber"];
+                        if (serialNumber != null)
+                        {
+                            var serial = serialNumber.ToString();
+                            if (!string.IsNullOrEmpty(serial) && serial != "To be filled by O.E.M.")
+                                return serial;
+                        }
+                    }
                 }
             }
             catch { }
@@ -70,12 +83,18 @@ namespace philips_protector
         {
             try
             {
-                using var searcher = new ManagementObjectSearcher("SELECT SerialNumber FROM Win32_DiskDrive WHERE Index=0");
-                foreach (ManagementObject obj in searcher.Get())
+                using (var searcher = new ManagementObjectSearcher("SELECT SerialNumber FROM Win32_DiskDrive WHERE Index=0"))
                 {
-                    var serial = obj["SerialNumber"]?.ToString();
-                    if (!string.IsNullOrEmpty(serial))
-                        return serial.Trim();
+                    foreach (ManagementObject obj in searcher.Get())
+                    {
+                        var serialNumber = obj["SerialNumber"];
+                        if (serialNumber != null)
+                        {
+                            var serial = serialNumber.ToString();
+                            if (!string.IsNullOrEmpty(serial))
+                                return serial.Trim();
+                        }
+                    }
                 }
             }
             catch { }
@@ -89,12 +108,18 @@ namespace philips_protector
         {
             try
             {
-                using var searcher = new ManagementObjectSearcher("SELECT MACAddress FROM Win32_NetworkAdapter WHERE MACAddress IS NOT NULL AND PhysicalAdapter=TRUE");
-                foreach (ManagementObject obj in searcher.Get())
+                using (var searcher = new ManagementObjectSearcher("SELECT MACAddress FROM Win32_NetworkAdapter WHERE MACAddress IS NOT NULL AND PhysicalAdapter=TRUE"))
                 {
-                    var mac = obj["MACAddress"]?.ToString();
-                    if (!string.IsNullOrEmpty(mac))
-                        return mac;
+                    foreach (ManagementObject obj in searcher.Get())
+                    {
+                        var macAddress = obj["MACAddress"];
+                        if (macAddress != null)
+                        {
+                            var mac = macAddress.ToString();
+                            if (!string.IsNullOrEmpty(mac))
+                                return mac;
+                        }
+                    }
                 }
             }
             catch { }
@@ -108,12 +133,18 @@ namespace philips_protector
         {
             try
             {
-                using var searcher = new ManagementObjectSearcher("SELECT SerialNumber FROM Win32_BIOS");
-                foreach (ManagementObject obj in searcher.Get())
+                using (var searcher = new ManagementObjectSearcher("SELECT SerialNumber FROM Win32_BIOS"))
                 {
-                    var serial = obj["SerialNumber"]?.ToString();
-                    if (!string.IsNullOrEmpty(serial))
-                        return serial;
+                    foreach (ManagementObject obj in searcher.Get())
+                    {
+                        var serialNumber = obj["SerialNumber"];
+                        if (serialNumber != null)
+                        {
+                            var serial = serialNumber.ToString();
+                            if (!string.IsNullOrEmpty(serial))
+                                return serial;
+                        }
+                    }
                 }
             }
             catch { }
@@ -127,12 +158,18 @@ namespace philips_protector
         {
             try
             {
-                using var searcher = new ManagementObjectSearcher("SELECT UUID FROM Win32_ComputerSystemProduct");
-                foreach (ManagementObject obj in searcher.Get())
+                using (var searcher = new ManagementObjectSearcher("SELECT UUID FROM Win32_ComputerSystemProduct"))
                 {
-                    var guid = obj["UUID"]?.ToString();
-                    if (!string.IsNullOrEmpty(guid))
-                        return guid;
+                    foreach (ManagementObject obj in searcher.Get())
+                    {
+                        var uuid = obj["UUID"];
+                        if (uuid != null)
+                        {
+                            var guid = uuid.ToString();
+                            if (!string.IsNullOrEmpty(guid))
+                                return guid;
+                        }
+                    }
                 }
             }
             catch { }

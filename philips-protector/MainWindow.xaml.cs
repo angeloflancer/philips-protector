@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,7 +19,7 @@ namespace philips_protector
     /// </summary>
     public partial class MainWindow : Window
     {
-        private HardwareInfo? _currentHardwareInfo;
+        private HardwareInfo _currentHardwareInfo;
 
         public MainWindow()
         {
@@ -42,7 +43,7 @@ namespace philips_protector
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading hardware information: {ex.Message}", 
+                MessageBox.Show(string.Format("Error loading hardware information: {0}", ex.Message), 
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -125,7 +126,7 @@ namespace philips_protector
             }
             catch (Exception ex)
             {
-                ShowStatus($"Error validating license: {ex.Message}", false);
+                ShowStatus(string.Format("Error validating license: {0}", ex.Message), false);
             }
         }
 
@@ -165,7 +166,7 @@ namespace philips_protector
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error copying to clipboard: {ex.Message}", 
+                MessageBox.Show(string.Format("Error copying to clipboard: {0}", ex.Message), 
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -194,13 +195,13 @@ namespace philips_protector
                     string licenseKey = FingerprintTextBox.Text;
                     System.IO.File.WriteAllText(saveFileDialog.FileName, licenseKey, Encoding.UTF8);
                     
-                    MessageBox.Show($"License key saved successfully!\n\nLocation: {saveFileDialog.FileName}", 
+                    MessageBox.Show(string.Format("License key saved successfully!\n\nLocation: {0}", saveFileDialog.FileName), 
                         "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving license key: {ex.Message}", 
+                MessageBox.Show(string.Format("Error saving license key: {0}", ex.Message), 
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
