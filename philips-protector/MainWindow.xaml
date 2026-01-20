@@ -8,88 +8,153 @@
         Title="Philips Protector - License Manager" Height="600" Width="900"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="420" />
+        </Grid.ColumnDefinitions>
 
-        <!-- Header -->
-        <TextBlock Grid.Row="0" Text="Hardware Fingerprint &amp; License Validation" 
-                   FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+        <!-- Left column: existing hardware/licensing UI -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <!-- Hardware Fingerprint Section -->
-        <GroupBox Grid.Row="1" Header="Hardware Fingerprint" Margin="0,0,0,15">
-            <StackPanel Margin="10">
-                <TextBlock Text="Current System Fingerprint:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                <TextBox x:Name="FingerprintTextBox" IsReadOnly="True" 
-                         TextWrapping="Wrap" 
-                         Background="#F5F5F5"
-                         Padding="8"
-                         MinHeight="60"
-                         VerticalScrollBarVisibility="Auto"/>
-                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                    <Button x:Name="CopyFingerprintButton" Content="Copy Fingerprint" 
-                            Click="CopyFingerprintButton_Click"
-                            Padding="10,5"
-                            Margin="0,0,10,0"/>
-                    <Button x:Name="SaveLicenseKeyButton" Content="Save License Key" 
-                            Click="SaveLicenseKeyButton_Click"
-                            Padding="10,5"/>
+            <!-- Header -->
+            <TextBlock Grid.Row="0" Text="Hardware Fingerprint &amp; License Validation" 
+                       FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+            <!-- Hardware Fingerprint Section -->
+            <GroupBox Grid.Row="1" Header="Hardware Fingerprint" Margin="0,0,0,15">
+                <StackPanel Margin="10">
+                    <TextBlock Text="Current System Fingerprint:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBox x:Name="FingerprintTextBox" IsReadOnly="True" 
+                             TextWrapping="Wrap" 
+                             Background="#F5F5F5"
+                             Padding="8"
+                             MinHeight="60"
+                             VerticalScrollBarVisibility="Auto"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button x:Name="CopyFingerprintButton" Content="Copy Fingerprint" 
+                                Click="CopyFingerprintButton_Click"
+                                Padding="10,5"
+                                Margin="0,0,10,0"/>
+                        <Button x:Name="SaveLicenseKeyButton" Content="Save License Key" 
+                                Click="SaveLicenseKeyButton_Click"
+                                Padding="10,5"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-        </GroupBox>
+            </GroupBox>
 
-        <!-- License Key Section (hidden per request; logic remains in code-behind) -->
-        <GroupBox Grid.Row="2" Header="License Key Validation" Margin="0,0,0,15" Visibility="Collapsed">
-            <StackPanel Margin="10">
-                <TextBlock Text="Enter License Key:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                <TextBox x:Name="LicenseKeyTextBox" 
-                         TextWrapping="Wrap"
-                         Padding="8"
-                         MinHeight="60"
-                         VerticalScrollBarVisibility="Auto"
-                         KeyDown="LicenseKeyTextBox_KeyDown"/>
-                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                    <Button x:Name="ValidateButton" Content="Validate License" 
-                            Click="ValidateButton_Click"
-                            Padding="15,8"
-                            FontWeight="SemiBold"
-                            IsDefault="True"/>
-                    <Button x:Name="ClearButton" Content="Clear" 
-                            Click="ClearButton_Click"
-                            Padding="15,8"
-                            Margin="10,0,0,0"/>
+            <!-- License Key Section (hidden per request; logic remains in code-behind) -->
+            <GroupBox Grid.Row="2" Header="License Key Validation" Margin="0,0,0,15" Visibility="Collapsed">
+                <StackPanel Margin="10">
+                    <TextBlock Text="Enter License Key:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBox x:Name="LicenseKeyTextBox" 
+                             TextWrapping="Wrap"
+                             Padding="8"
+                             MinHeight="60"
+                             VerticalScrollBarVisibility="Auto"
+                             KeyDown="LicenseKeyTextBox_KeyDown"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button x:Name="ValidateButton" Content="Validate License" 
+                                Click="ValidateButton_Click"
+                                Padding="15,8"
+                                FontWeight="SemiBold"
+                                IsDefault="True"/>
+                        <Button x:Name="ClearButton" Content="Clear" 
+                                Click="ClearButton_Click"
+                                Padding="15,8"
+                                Margin="10,0,0,0"/>
+                    </StackPanel>
                 </StackPanel>
+            </GroupBox>
+
+            <!-- Validation Status -->
+            <Border Grid.Row="3" x:Name="StatusBorder" 
+                    Background="#E8F5E9" 
+                    BorderBrush="#4CAF50" 
+                    BorderThickness="2"
+                    CornerRadius="5"
+                    Padding="15"
+                    Margin="0,0,0,15"
+                    Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock x:Name="StatusTextBlock" 
+                               FontSize="16" 
+                               FontWeight="SemiBold"
+                               Foreground="#2E7D32"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Hardware Details Section -->
+            <GroupBox Grid.Row="4" Header="Hardware Details" Margin="0,0,0,15">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                    <StackPanel x:Name="HardwareDetailsPanel" Margin="10"/>
+                </ScrollViewer>
+            </GroupBox>
+        </Grid>
+
+        <!-- Right column: Icon manager -->
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20,0,0,0">
+                <GroupBox Header="Extract Icon" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Select EXE:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="ExtractExePathTextBox" Width="230" IsReadOnly="True" Margin="0,0,8,0"/>
+                            <Button x:Name="SelectExtractExeButton" Content="Browse..." Width="80" Click="SelectExtractExeButton_Click"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Icon Size:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ComboBox x:Name="IconSizeComboBox" Width="120" SelectedIndex="3">
+                                <ComboBoxItem Content="16" />
+                                <ComboBoxItem Content="32" />
+                                <ComboBoxItem Content="48" />
+                                <ComboBoxItem Content="256" />
+                            </ComboBox>
+                            <Button x:Name="ExtractIconButton" Content="Extract Icon" Width="100" Margin="10,0,0,0" Click="ExtractIconButton_Click"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Image x:Name="IconPreviewImage" Width="64" Height="64" Stretch="Uniform"/>
+                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                <Button x:Name="SaveIconToFolderButton" Content="Save to Folder..." Width="120" Margin="0,0,8,0" Click="SaveIconToFolderButton_Click"/>
+                                <Button x:Name="SaveIconToTempButton" Content="Save to Temp" Width="100" Click="SaveIconToTempButton_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <TextBlock x:Name="IconExtractStatusTextBlock" Margin="0,8,0,0" Foreground="#2E7D32"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Replace Icon">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Target EXE:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="ReplaceExePathTextBox" Width="230" IsReadOnly="True" Margin="0,0,8,0"/>
+                            <Button x:Name="SelectReplaceExeButton" Content="Browse..." Width="80" Click="SelectReplaceExeButton_Click"/>
+                        </StackPanel>
+
+                        <TextBlock Text="Icon File (ICO/PNG/BMP):" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="ReplaceIconPathTextBox" Width="230" IsReadOnly="True" Margin="0,0,8,0"/>
+                            <Button x:Name="SelectIconFileButton" Content="Browse..." Width="80" Click="SelectIconFileButton_Click"/>
+                        </StackPanel>
+
+                        <CheckBox x:Name="UseTempIconCheckBox" Content="Use temp icon (if saved)" Margin="0,10,0,0" Checked="UseTempIconCheckBox_Checked" Unchecked="UseTempIconCheckBox_Unchecked"/>
+
+                        <Button x:Name="ReplaceIconButton" Content="Replace Icon" Width="120" Margin="0,10,0,0" Click="ReplaceIconButton_Click"/>
+
+                        <TextBlock x:Name="IconReplaceStatusTextBlock" Margin="0,8,0,0" Foreground="#2E7D32"/>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
-        </GroupBox>
-
-        <!-- Validation Status -->
-        <Border Grid.Row="3" x:Name="StatusBorder" 
-                Background="#E8F5E9" 
-                BorderBrush="#4CAF50" 
-                BorderThickness="2"
-                CornerRadius="5"
-                Padding="15"
-                Margin="0,0,0,15"
-                Visibility="Collapsed">
-            <StackPanel>
-                <TextBlock x:Name="StatusTextBlock" 
-                           FontSize="16" 
-                           FontWeight="SemiBold"
-                           Foreground="#2E7D32"/>
-            </StackPanel>
-        </Border>
-
-        <!-- Hardware Details Section -->
-        <GroupBox Grid.Row="4" Header="Hardware Details" Margin="0,0,0,15">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
-                <StackPanel x:Name="HardwareDetailsPanel" Margin="10"/>
-            </ScrollViewer>
-        </GroupBox>
-
+        </ScrollViewer>
     </Grid>
 </Window>

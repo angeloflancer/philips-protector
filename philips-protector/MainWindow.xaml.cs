@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,10 +21,14 @@ namespace philips_protector
     public partial class MainWindow : Window
     {
         private HardwareInfo _currentHardwareInfo;
+        private string _tempIconPath;
+        private byte[] _lastExtractedIconBytes;
 
         public MainWindow()
         {
             InitializeComponent();
+            _tempIconPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "philips_protector_temp_icon.ico");
+            InitializeTempIconState();
             LoadHardwareInfo();
         }
 
@@ -43,7 +48,7 @@ namespace philips_protector
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("Error loading hardware information: {0}", ex.Message), 
+                MessageBox.Show(string.Format("Error loading hardware information: {0}", ex.Message),
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -62,22 +67,22 @@ namespace philips_protector
 
         private void AddDetailRow(string label, string value)
         {
-            var stackPanel = new StackPanel 
-            { 
-                Orientation = Orientation.Horizontal, 
-                Margin = new Thickness(0, 5, 0, 5) 
+            var stackPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(0, 5, 0, 5)
             };
 
-            var labelText = new TextBlock 
-            { 
-                Text = label, 
+            var labelText = new TextBlock
+            {
+                Text = label,
                 FontWeight = FontWeights.SemiBold,
                 Width = 180,
                 VerticalAlignment = VerticalAlignment.Center
             };
 
-            var valueText = new TextBlock 
-            { 
+            var valueText = new TextBlock
+            {
                 Text = value,
                 TextWrapping = TextWrapping.Wrap,
                 VerticalAlignment = VerticalAlignment.Center
@@ -161,12 +166,12 @@ namespace philips_protector
             try
             {
                 Clipboard.SetText(FingerprintTextBox.Text);
-                MessageBox.Show("Hardware fingerprint copied to clipboard!", 
+                MessageBox.Show("Hardware fingerprint copied to clipboard!",
                     "Copied", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("Error copying to clipboard: {0}", ex.Message), 
+                MessageBox.Show(string.Format("Error copying to clipboard: {0}", ex.Message),
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -177,7 +182,7 @@ namespace philips_protector
             {
                 if (string.IsNullOrWhiteSpace(FingerprintTextBox.Text))
                 {
-                    MessageBox.Show("No license key to save. Please ensure hardware fingerprint is loaded.", 
+                    MessageBox.Show("No license key to save. Please ensure hardware fingerprint is loaded.",
                         "No License Key", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -194,16 +199,228 @@ namespace philips_protector
                 {
                     string licenseKey = FingerprintTextBox.Text;
                     System.IO.File.WriteAllText(saveFileDialog.FileName, licenseKey, Encoding.UTF8);
-                    
-                    MessageBox.Show(string.Format("License key saved successfully!\n\nLocation: {0}", saveFileDialog.FileName), 
+
+                    MessageBox.Show(string.Format("License key saved successfully!\n\nLocation: {0}", saveFileDialog.FileName),
                         "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("Error saving license key: {0}", ex.Message), 
+                MessageBox.Show(string.Format("Error saving license key: {0}", ex.Message),
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        #region Icon extraction / replacement
+
+        private void InitializeTempIconState()
+        {
+            bool exists = File.Exists(_tempIconPath);
+            UseTempIconCheckBox.IsEnabled = exists;
+            UseTempIconCheckBox.IsChecked = exists;
+            if (exists)
+            {
+                IconExtractStatusTextBlock.Text = "Temp icon available.";
+            }
+        }
+
+        private void SelectExtractExeButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog();
+            dialog.Filter = "Executable Files (*.exe)|*.exe|All Files (*.*)|*.*";
+            if (dialog.ShowDialog() == true)
+            {
+                ExtractExePathTextBox.Text = dialog.FileName;
+            }
+        }
+
+        private void ExtractIconButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ExtractExePathTextBox.Text) || !File.Exists(ExtractExePathTextBox.Text))
+                {
+                    IconExtractStatusTextBlock.Text = "Please select a valid executable.";
+                    IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+                    return;
+                }
+
+                int size = GetSelectedIconSize();
+                _lastExtractedIconBytes = IconExtractor.ExtractIconBytes(ExtractExePathTextBox.Text, size);
+                SetIconPreview(_lastExtractedIconBytes);
+
+                IconExtractStatusTextBlock.Text = "Icon extracted.";
+                IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
+            }
+            catch (Exception ex)
+            {
+                IconExtractStatusTextBlock.Text = string.Format("Error extracting icon: {0}", ex.Message);
+                IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+            }
+        }
+
+        private int GetSelectedIconSize()
+        {
+            ComboBoxItem item = IconSizeComboBox.SelectedItem as ComboBoxItem;
+            int size;
+            if (item != null && int.TryParse(item.Content.ToString(), out size))
+            {
+                return size;
+            }
+            return 256;
+        }
+
+        private void SetIconPreview(byte[] iconBytes)
+        {
+            if (iconBytes == null)
+            {
+                IconPreviewImage.Source = null;
+                return;
+            }
+
+            using (var ms = new MemoryStream(iconBytes))
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.StreamSource = ms;
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                IconPreviewImage.Source = bitmap;
+            }
+        }
+
+        private void SaveIconToFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_lastExtractedIconBytes == null || _lastExtractedIconBytes.Length == 0)
+                {
+                    IconExtractStatusTextBlock.Text = "No icon to save. Extract first.";
+                    IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+                    return;
+                }
+
+                var dialog = new SaveFileDialog();
+                dialog.Filter = "Icon Files (*.ico)|*.ico|All Files (*.*)|*.*";
+                dialog.FileName = "extracted_icon.ico";
+                if (dialog.ShowDialog() == true)
+                {
+                    File.WriteAllBytes(dialog.FileName, _lastExtractedIconBytes);
+                    IconExtractStatusTextBlock.Text = string.Format("Icon saved to: {0}", dialog.FileName);
+                    IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
+                }
+            }
+            catch (Exception ex)
+            {
+                IconExtractStatusTextBlock.Text = string.Format("Error saving icon: {0}", ex.Message);
+                IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+            }
+        }
+
+        private void SaveIconToTempButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_lastExtractedIconBytes == null || _lastExtractedIconBytes.Length == 0)
+                {
+                    IconExtractStatusTextBlock.Text = "No icon to save. Extract first.";
+                    IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+                    return;
+                }
+
+                File.WriteAllBytes(_tempIconPath, _lastExtractedIconBytes);
+                UseTempIconCheckBox.IsEnabled = true;
+                UseTempIconCheckBox.IsChecked = true;
+                IconExtractStatusTextBlock.Text = string.Format("Icon saved to temp: {0}", _tempIconPath);
+                IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
+            }
+            catch (Exception ex)
+            {
+                IconExtractStatusTextBlock.Text = string.Format("Error saving temp icon: {0}", ex.Message);
+                IconExtractStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+            }
+        }
+
+        private void SelectReplaceExeButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog();
+            dialog.Filter = "Executable Files (*.exe)|*.exe|All Files (*.*)|*.*";
+            if (dialog.ShowDialog() == true)
+            {
+                ReplaceExePathTextBox.Text = dialog.FileName;
+            }
+        }
+
+        private void SelectIconFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog();
+            dialog.Filter = "Icon/Images (*.ico;*.png;*.bmp;*.jpg;*.jpeg)|*.ico;*.png;*.bmp;*.jpg;*.jpeg|All Files (*.*)|*.*";
+            if (dialog.ShowDialog() == true)
+            {
+                ReplaceIconPathTextBox.Text = dialog.FileName;
+            }
+        }
+
+        private void UseTempIconCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (UseTempIconCheckBox.IsChecked == true)
+            {
+                ReplaceIconPathTextBox.IsEnabled = false;
+                SelectIconFileButton.IsEnabled = false;
+            }
+        }
+
+        private void UseTempIconCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ReplaceIconPathTextBox.IsEnabled = true;
+            SelectIconFileButton.IsEnabled = true;
+        }
+
+        private void ReplaceIconButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string targetExe = ReplaceExePathTextBox.Text;
+                if (string.IsNullOrWhiteSpace(targetExe) || !File.Exists(targetExe))
+                {
+                    IconReplaceStatusTextBlock.Text = "Please select a valid target executable.";
+                    IconReplaceStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+                    return;
+                }
+
+                string iconPath = ReplaceIconPathTextBox.Text;
+                bool useTemp = UseTempIconCheckBox.IsChecked == true;
+                if (useTemp)
+                {
+                    iconPath = _tempIconPath;
+                }
+
+                if (string.IsNullOrWhiteSpace(iconPath) || !File.Exists(iconPath))
+                {
+                    IconReplaceStatusTextBlock.Text = "Please select an icon file (or save to temp first).";
+                    IconReplaceStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+                    return;
+                }
+
+                string icoPathToUse = iconPath;
+                string extension = System.IO.Path.GetExtension(iconPath).ToLowerInvariant();
+                if (extension != ".ico")
+                {
+                    icoPathToUse = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "philips_protector_converted_icon.ico");
+                    ImageConverter.ConvertToIco(iconPath, icoPathToUse, new int[] { 16, 32, 48, 256 });
+                }
+
+                IconReplacer.ReplaceIcon(targetExe, icoPathToUse);
+                IconReplaceStatusTextBlock.Text = "Icon replaced successfully.";
+                IconReplaceStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(46, 125, 50));
+            }
+            catch (Exception ex)
+            {
+                IconReplaceStatusTextBlock.Text = string.Format("Error replacing icon: {0}", ex.Message);
+                IconReplaceStatusTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+            }
+        }
+
+        #endregion
     }
 }

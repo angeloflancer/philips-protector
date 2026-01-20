@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Windows.Forms" />
@@ -75,6 +76,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="HardwareFingerprint.cs" />
+    <Compile Include="IconExtractor.cs" />
+    <Compile Include="IconReplacer.cs" />
+    <Compile Include="ImageConverter.cs" />
     <Compile Include="LicenseGenerator.cs" />
     <Compile Include="LicenseValidator.cs" />
     <Compile Include="MainWindow.xaml.cs">
