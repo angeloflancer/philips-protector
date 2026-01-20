@@ -43,8 +43,8 @@
             </StackPanel>
         </GroupBox>
 
-        <!-- License Key Section -->
-        <GroupBox Grid.Row="2" Header="License Key Validation" Margin="0,0,0,15">
+        <!-- License Key Section (hidden per request; logic remains in code-behind) -->
+        <GroupBox Grid.Row="2" Header="License Key Validation" Margin="0,0,0,15" Visibility="Collapsed">
             <StackPanel Margin="10">
                 <TextBlock Text="Enter License Key:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                 <TextBox x:Name="LicenseKeyTextBox" 

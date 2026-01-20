@@ -32,11 +32,13 @@ namespace philips_protector
         }
 
         /// <summary>
-        /// Normalizes a license key by removing dashes and converting to uppercase
+        /// Normalizes a Base64 license key by removing whitespace and dashes (if any)
+        /// Base64 is case-sensitive, so we preserve the original case
         /// </summary>
         private static string NormalizeLicenseKey(string licenseKey)
         {
-            return licenseKey.Replace("-", "").Replace(" ", "").ToUpperInvariant().Trim();
+            // Remove whitespace, dashes, and spaces that might have been added for readability
+            return licenseKey.Replace("-", "").Replace(" ", "").Replace("\t", "").Replace("\n", "").Replace("\r", "").Trim();
         }
 
         /// <summary>
