@@ -241,20 +241,28 @@ namespace MazSvc
                 
                 try
                 {
+                    // Use Byte mode for Windows XP compatibility
                     pipeServer = new NamedPipeServerStream(
                         PIPE_NAME,
                         PipeDirection.InOut,
                         NamedPipeServerStream.MaxAllowedServerInstances,
-                        PipeTransmissionMode.Message,
+                        PipeTransmissionMode.Byte,
                         PipeOptions.None);
 
                     pipeServer.WaitForConnection();
 
                     if (_stopPipeServer) break;
 
-                    // Read the request
+                    // Read the request (read until newline or max bytes)
                     byte[] requestBuffer = new byte[1024];
-                    int bytesRead = pipeServer.Read(requestBuffer, 0, requestBuffer.Length);
+                    int bytesRead = 0;
+                    int b;
+                    while (bytesRead < requestBuffer.Length && (b = pipeServer.ReadByte()) != -1)
+                    {
+                        if (b == '\n') break;
+                        requestBuffer[bytesRead++] = (byte)b;
+                    }
+                    
                     string request = Encoding.UTF8.GetString(requestBuffer, 0, bytesRead).Trim();
 
                     string response = "";
@@ -269,7 +277,8 @@ namespace MazSvc
                         response = "PONG";
                     }
 
-                    // Send response
+                    // Send response with newline terminator
+                    response = response + "\n";
                     byte[] responseBuffer = Encoding.UTF8.GetBytes(response);
                     pipeServer.Write(responseBuffer, 0, responseBuffer.Length);
                     pipeServer.Flush();

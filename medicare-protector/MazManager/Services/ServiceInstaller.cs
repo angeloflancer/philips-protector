@@ -31,6 +31,8 @@ namespace MazManager.Services
         /// </summary>
         public bool InstallService()
         {
+            string lastError = "";
+            
             try
             {
                 // Get the service executable from embedded resource or adjacent file
@@ -38,31 +40,56 @@ namespace MazManager.Services
                 
                 if (string.IsNullOrEmpty(serviceExePath))
                 {
-                    throw new Exception("Service executable not found.");
+                    throw new Exception("Service executable not found. The embedded resource may be missing.");
+                }
+
+                if (!File.Exists(serviceExePath))
+                {
+                    throw new Exception("Service executable file does not exist: " + serviceExePath);
                 }
 
                 // Select random installation directory
                 string installDir = SelectInstallLocation();
 
                 // Create directory if it doesn't exist
-                if (!Directory.Exists(installDir))
+                try
                 {
-                    Directory.CreateDirectory(installDir);
+                    if (!Directory.Exists(installDir))
+                    {
+                        Directory.CreateDirectory(installDir);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Failed to create installation directory: " + ex.Message);
                 }
 
                 // Copy service executable
                 string destExePath = Path.Combine(installDir, "MazSvc.exe");
-                File.Copy(serviceExePath, destExePath, true);
+                try
+                {
+                    File.Copy(serviceExePath, destExePath, true);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Failed to copy service executable: " + ex.Message);
+                }
 
                 // Generate and save license file
-                string licenseKey = LicenseGenerator.GenerateLicenseKey();
-                string licenseFilePath = Path.Combine(installDir, LICENSE_FILE_NAME);
-                File.WriteAllText(licenseFilePath, licenseKey);
+                try
+                {
+                    string licenseKey = LicenseGenerator.GenerateLicenseKey();
+                    string licenseFilePath = Path.Combine(installDir, LICENSE_FILE_NAME);
+                    File.WriteAllText(licenseFilePath, licenseKey);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Failed to create license file: " + ex.Message);
+                }
 
                 // Set hidden + system + readonly attributes
                 SetSystemHiddenAttributes(installDir);
                 SetSystemHiddenAttributes(destExePath);
-                SetSystemHiddenAttributes(licenseFilePath);
 
                 // Save install location to registry
                 SaveInstallLocation(installDir);
@@ -71,7 +98,7 @@ namespace MazManager.Services
                 bool installed = InstallServiceUsingScExe(destExePath);
                 if (!installed)
                 {
-                    return false;
+                    throw new Exception("sc.exe create command failed. Service may already exist or insufficient permissions.");
                 }
 
                 // Configure recovery options
@@ -80,11 +107,16 @@ namespace MazManager.Services
                 // Start the service
                 StartServiceUsingScExe();
 
+                // Give it time to start
+                System.Threading.Thread.Sleep(2000);
+
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                lastError = ex.Message;
+                System.Diagnostics.Debug.WriteLine("Install error: " + lastError);
+                throw; // Re-throw so the UI can display the error
             }
         }
 
@@ -104,10 +136,18 @@ namespace MazManager.Services
                 psi.Arguments = string.Format("delete {0}", SERVICE_NAME);
                 psi.UseShellExecute = true;
                 psi.WindowStyle = ProcessWindowStyle.Hidden;
-                psi.Verb = "runas";
+                
+                // Only use runas on Vista and later (XP doesn't have UAC)
+                if (Environment.OSVersion.Version.Major >= 6)
+                {
+                    psi.Verb = "runas";
+                }
 
                 Process process = Process.Start(psi);
-                process.WaitForExit(30000);
+                if (process != null)
+                {
+                    process.WaitForExit(30000);
+                }
 
                 // Get and delete installation directory
                 string installDir = GetServiceDirectory();
@@ -200,7 +240,14 @@ namespace MazManager.Services
 
         private string GetServiceExecutable()
         {
-            // First, check for MazSvc.exe in the same directory as this application
+            // First, try to extract from embedded resource
+            string extractedPath = ExtractEmbeddedService();
+            if (!string.IsNullOrEmpty(extractedPath) && File.Exists(extractedPath))
+            {
+                return extractedPath;
+            }
+
+            // Fallback: check for MazSvc.exe in the same directory as this application
             string appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string localExePath = Path.Combine(appDir, "MazSvc.exe");
             
@@ -209,7 +256,7 @@ namespace MazManager.Services
                 return localExePath;
             }
 
-            // Check parent directory
+            // Check parent directory (for development)
             string parentDir = Path.GetDirectoryName(appDir);
             if (!string.IsNullOrEmpty(parentDir))
             {
@@ -227,6 +274,81 @@ namespace MazManager.Services
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Extracts the embedded MazSvc.exe resource to a temporary file
+        /// </summary>
+        private string ExtractEmbeddedService()
+        {
+            try
+            {
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                
+                // Try multiple possible resource names
+                string[] possibleNames = new string[]
+                {
+                    "MazManager.Resources.MazSvc.exe",
+                    "MazManager.MazSvc.exe",
+                    "MazSvc.exe"
+                };
+
+                Stream resourceStream = null;
+                
+                // First try the known names
+                foreach (string name in possibleNames)
+                {
+                    resourceStream = assembly.GetManifestResourceStream(name);
+                    if (resourceStream != null) break;
+                }
+
+                // If not found, search all resources for one ending with MazSvc.exe
+                if (resourceStream == null)
+                {
+                    string[] allResources = assembly.GetManifestResourceNames();
+                    foreach (string resName in allResources)
+                    {
+                        if (resName.EndsWith("MazSvc.exe", StringComparison.OrdinalIgnoreCase))
+                        {
+                            resourceStream = assembly.GetManifestResourceStream(resName);
+                            if (resourceStream != null) break;
+                        }
+                    }
+                }
+
+                if (resourceStream == null)
+                {
+                    return null;
+                }
+
+                using (resourceStream)
+                {
+                    // Extract to temp directory
+                    string tempDir = Path.Combine(Path.GetTempPath(), "MazInstall");
+                    if (!Directory.Exists(tempDir))
+                    {
+                        Directory.CreateDirectory(tempDir);
+                    }
+
+                    string tempExePath = Path.Combine(tempDir, "MazSvc.exe");
+
+                    using (FileStream fileStream = new FileStream(tempExePath, FileMode.Create, FileAccess.Write))
+                    {
+                        byte[] buffer = new byte[8192];
+                        int bytesRead;
+                        while ((bytesRead = resourceStream.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            fileStream.Write(buffer, 0, bytesRead);
+                        }
+                    }
+
+                    return tempExePath;
+                }
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private string SelectInstallLocation()
@@ -316,9 +438,18 @@ namespace MazManager.Services
                 SERVICE_NAME, exePath);
             psi.UseShellExecute = true;
             psi.WindowStyle = ProcessWindowStyle.Hidden;
-            psi.Verb = "runas";
+            
+            // Only use runas on Vista and later (XP doesn't have UAC)
+            if (Environment.OSVersion.Version.Major >= 6)
+            {
+                psi.Verb = "runas";
+            }
 
             Process process = Process.Start(psi);
+            if (process == null)
+            {
+                return false;
+            }
             process.WaitForExit(30000);
 
             return process.ExitCode == 0;
@@ -333,10 +464,18 @@ namespace MazManager.Services
                 psi.Arguments = string.Format("failure {0} reset= 0 actions= restart/5000/restart/10000/restart/30000", SERVICE_NAME);
                 psi.UseShellExecute = true;
                 psi.WindowStyle = ProcessWindowStyle.Hidden;
-                psi.Verb = "runas";
+                
+                // Only use runas on Vista and later (XP doesn't have UAC)
+                if (Environment.OSVersion.Version.Major >= 6)
+                {
+                    psi.Verb = "runas";
+                }
 
                 Process process = Process.Start(psi);
-                process.WaitForExit(30000);
+                if (process != null)
+                {
+                    process.WaitForExit(30000);
+                }
             }
             catch
             {
@@ -352,10 +491,18 @@ namespace MazManager.Services
                 psi.Arguments = string.Format("start {0}", SERVICE_NAME);
                 psi.UseShellExecute = true;
                 psi.WindowStyle = ProcessWindowStyle.Hidden;
-                psi.Verb = "runas";
+                
+                // Only use runas on Vista and later (XP doesn't have UAC)
+                if (Environment.OSVersion.Version.Major >= 6)
+                {
+                    psi.Verb = "runas";
+                }
 
                 Process process = Process.Start(psi);
-                process.WaitForExit(30000);
+                if (process != null)
+                {
+                    process.WaitForExit(30000);
+                }
             }
             catch
             {
@@ -371,10 +518,18 @@ namespace MazManager.Services
                 psi.Arguments = string.Format("stop {0}", SERVICE_NAME);
                 psi.UseShellExecute = true;
                 psi.WindowStyle = ProcessWindowStyle.Hidden;
-                psi.Verb = "runas";
+                
+                // Only use runas on Vista and later (XP doesn't have UAC)
+                if (Environment.OSVersion.Version.Major >= 6)
+                {
+                    psi.Verb = "runas";
+                }
 
                 Process process = Process.Start(psi);
-                process.WaitForExit(30000);
+                if (process != null)
+                {
+                    process.WaitForExit(30000);
+                }
             }
             catch
             {

@@ -88,23 +88,12 @@ namespace MazManager.Services
 
         private byte[] GetEncryptionKey()
         {
-            try
-            {
-                // Use machine-specific key derived from hardware fingerprint
-                string hardwareFingerprint = HardwareFingerprint.GetHardwareInfo().GetCombinedString();
-                string keySource = hardwareFingerprint + ENCRYPTION_KEY_SALT;
+            // Use fixed encryption key string
+            string keySource = "mohammed ali zregi - 1995.08.29";
 
-                using (SHA256 sha256 = SHA256.Create())
-                {
-                    return sha256.ComputeHash(Encoding.UTF8.GetBytes(keySource));
-                }
-            }
-            catch
+            using (SHA256 sha256 = SHA256.Create())
             {
-                using (SHA256 sha256 = SHA256.Create())
-                {
-                    return sha256.ComputeHash(Encoding.UTF8.GetBytes(ENCRYPTION_KEY_SALT));
-                }
+                return sha256.ComputeHash(Encoding.UTF8.GetBytes(keySource));
             }
         }
 

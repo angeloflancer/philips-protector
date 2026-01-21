@@ -27,17 +27,15 @@ namespace MazManager.Services
                 using (NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.InOut))
                 {
                     pipeClient.Connect(CONNECT_TIMEOUT_MS);
-                    pipeClient.ReadMode = PipeTransmissionMode.Message;
+                    // Use Byte mode for Windows XP compatibility (don't set ReadMode)
 
-                    // Send request
-                    byte[] request = Encoding.UTF8.GetBytes("GET_STATUS");
+                    // Send request with newline terminator
+                    byte[] request = Encoding.UTF8.GetBytes("GET_STATUS\n");
                     pipeClient.Write(request, 0, request.Length);
                     pipeClient.Flush();
 
-                    // Read response
-                    byte[] responseBuffer = new byte[4096];
-                    int bytesRead = pipeClient.Read(responseBuffer, 0, responseBuffer.Length);
-                    string response = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
+                    // Read response until newline
+                    string response = ReadLineFromPipe(pipeClient);
 
                     // Parse JSON response
                     processes = ParseJsonResponse(response);
@@ -61,17 +59,15 @@ namespace MazManager.Services
                 using (NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.InOut))
                 {
                     pipeClient.Connect(CONNECT_TIMEOUT_MS);
-                    pipeClient.ReadMode = PipeTransmissionMode.Message;
+                    // Use Byte mode for Windows XP compatibility (don't set ReadMode)
 
-                    // Send ping request
-                    byte[] request = Encoding.UTF8.GetBytes("PING");
+                    // Send ping request with newline terminator
+                    byte[] request = Encoding.UTF8.GetBytes("PING\n");
                     pipeClient.Write(request, 0, request.Length);
                     pipeClient.Flush();
 
-                    // Read response
-                    byte[] responseBuffer = new byte[256];
-                    int bytesRead = pipeClient.Read(responseBuffer, 0, responseBuffer.Length);
-                    string response = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead).Trim();
+                    // Read response until newline
+                    string response = ReadLineFromPipe(pipeClient);
 
                     return response == "PONG";
                 }
@@ -80,6 +76,24 @@ namespace MazManager.Services
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Reads a line from the pipe (until newline or max bytes)
+        /// </summary>
+        private string ReadLineFromPipe(NamedPipeClientStream pipeClient)
+        {
+            byte[] buffer = new byte[8192];
+            int bytesRead = 0;
+            int b;
+            
+            while (bytesRead < buffer.Length && (b = pipeClient.ReadByte()) != -1)
+            {
+                if (b == '\n') break;
+                buffer[bytesRead++] = (byte)b;
+            }
+            
+            return Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
         }
 
         /// <summary>
