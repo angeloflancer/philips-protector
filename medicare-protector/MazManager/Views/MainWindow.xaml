@@ -1,179 +1,244 @@
 <Window x:Class="MazManager.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Medicare Protection Manager" 
-        MinHeight="550" MinWidth="450"
-        Height="620" Width="480"
+        Title="Zregi Terminator" 
+        Height="580" Width="460"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BackgroundBrush}"
-        ResizeMode="CanResize">
+        Background="Transparent"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        ResizeMode="NoResize">
     
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="15">
+    <!-- Custom Window Border with rounded corners -->
+    <Border Background="{StaticResource BackgroundBrush}" 
+            CornerRadius="8" 
+            BorderBrush="#CCCCCC" 
+            BorderThickness="1"
+            Margin="5">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.3"/>
+        </Border.Effect>
+        
+        <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
-            <Border Grid.Row="0" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
-                <StackPanel>
-                    <TextBlock Text="Medicare Protection Manager" 
-                               FontSize="20" 
-                               FontWeight="Bold" 
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Service Management Console" 
-                               FontSize="13" 
-                               Foreground="{StaticResource TextSecondaryBrush}"
-                               Margin="0,5,0,0"/>
-                </StackPanel>
-            </Border>
-
-            <!-- Service Status Card -->
-            <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
+            <!-- Custom Title Bar -->
+            <Border Grid.Row="0" 
+                    Background="{StaticResource PrimaryBrush}" 
+                    CornerRadius="8,8,0,0"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Service Status" 
-                                   FontSize="14" 
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                            <Ellipse x:Name="StatusIndicator" 
-                                     Width="12" Height="12" 
-                                     Fill="{StaticResource TextSecondaryBrush}"
-                                     VerticalAlignment="Center"/>
-                            <TextBlock x:Name="StatusText" 
-                                       Text="Checking..." 
-                                       FontSize="13"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="8,0,0,0"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
+                    <TextBlock Text="Zregi Terminator" 
+                               Foreground="White" 
+                               FontSize="14" 
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" 
+                               Margin="15,0,0,0"/>
+                    
+                    <!-- Window Controls -->
+                    <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Right" 
+                                VerticalAlignment="Center"
+                                Margin="0,0,5,0">
+                        <Button x:Name="MinimizeButton" 
+                                Content="─" 
+                                Width="30" Height="26"
+                                Background="Transparent"
+                                Foreground="White"
+                                BorderThickness="0"
+                                FontSize="12"
+                                Click="MinimizeButton_Click"
+                                Cursor="Hand"/>
+                        <Button x:Name="CloseButton" 
+                                Content="✕" 
+                                Width="30" Height="26"
+                                Background="Transparent"
+                                Foreground="White"
+                                BorderThickness="0"
+                                FontSize="12"
+                                Click="CloseButton_Click"
+                                Cursor="Hand"/>
                     </StackPanel>
-
-                    <Button x:Name="RefreshButton" 
-                            Grid.Column="1" 
-                            Content="Refresh"
-                            Style="{StaticResource ModernButton}"
-                            Padding="12,8"
-                            Click="RefreshButton_Click"/>
                 </Grid>
             </Border>
 
-            <!-- Service Control Card -->
-            <Border Grid.Row="2" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
-                <StackPanel>
-                    <TextBlock Text="Service Control" 
-                               FontSize="14" 
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               Margin="0,0,0,12"/>
+            <!-- Main Content -->
+            <Grid Grid.Row="1" Margin="15">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
+                <!-- Header -->
+                <Border Grid.Row="0" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="Zregi Terminator" 
+                                   FontSize="18" 
+                                   FontWeight="Bold" 
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Medicare Protection Manager" 
+                                   FontSize="12" 
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Margin="0,3,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Service Status Card -->
+                <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="8"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
 
-                        <Button x:Name="InstallButton" 
-                                Grid.Row="0" Grid.Column="0"
-                                Content="Install Service"
-                                Style="{StaticResource SuccessButton}"
-                                Padding="10,10"
-                                Click="InstallButton_Click"/>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Service Status" 
+                                       FontSize="13" 
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <Ellipse x:Name="StatusIndicator" 
+                                         Width="10" Height="10" 
+                                         Fill="{StaticResource TextSecondaryBrush}"
+                                         VerticalAlignment="Center"/>
+                                <TextBlock x:Name="StatusText" 
+                                           Text="Checking..." 
+                                           FontSize="12"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           Margin="6,0,0,0"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
 
-                        <Button x:Name="UninstallButton" 
-                                Grid.Row="0" Grid.Column="2"
-                                Content="Uninstall Service"
-                                Style="{StaticResource DangerButton}"
-                                Padding="10,10"
-                                Click="UninstallButton_Click"/>
-
-                        <Button x:Name="StartButton" 
-                                Grid.Row="2" Grid.Column="0"
-                                Content="Start Service"
+                        <Button x:Name="RefreshButton" 
+                                Grid.Column="1" 
+                                Content="Refresh"
                                 Style="{StaticResource ModernButton}"
-                                Padding="10,10"
-                                Click="StartButton_Click"/>
-
-                        <Button x:Name="StopButton" 
-                                Grid.Row="2" Grid.Column="2"
-                                Content="Stop Service"
-                                Style="{StaticResource ModernButton}"
-                                Background="{StaticResource WarningBrush}"
-                                Padding="10,10"
-                                Click="StopButton_Click"/>
+                                Padding="10,6"
+                                FontSize="12"
+                                Click="RefreshButton_Click"/>
                     </Grid>
-                </StackPanel>
-            </Border>
+                </Border>
 
-            <!-- Configuration Card -->
-            <Border Grid.Row="3" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
-                <StackPanel>
-                    <TextBlock Text="Configuration" 
-                               FontSize="14" 
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               Margin="0,0,0,12"/>
+                <!-- Service Control Card -->
+                <Border Grid.Row="2" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="Service Control" 
+                                   FontSize="13" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Margin="0,0,0,10"/>
 
-                    <Button x:Name="ManageExeButton" 
-                            Content="Manage Protected Executables"
-                            Style="{StaticResource ModernButton}"
-                            HorizontalAlignment="Stretch"
-                            Padding="10,10"
-                            Click="ManageExeButton_Click"/>
-                </StackPanel>
-            </Border>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="6"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-            <!-- Hardware Info Card -->
-            <Border Grid.Row="4" Style="{StaticResource CardBorder}">
-                <StackPanel>
-                    <TextBlock Text="Hardware License" 
-                               FontSize="14" 
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               Margin="0,0,0,8"/>
+                            <Button x:Name="InstallButton" 
+                                    Grid.Row="0" Grid.Column="0"
+                                    Content="Install Service"
+                                    Style="{StaticResource SuccessButton}"
+                                    Padding="8,8"
+                                    FontSize="12"
+                                    Click="InstallButton_Click"/>
 
-                    <TextBlock Text="Hardware Fingerprint:" 
-                               FontSize="11"
-                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Button x:Name="UninstallButton" 
+                                    Grid.Row="0" Grid.Column="2"
+                                    Content="Uninstall Service"
+                                    Style="{StaticResource DangerButton}"
+                                    Padding="8,8"
+                                    FontSize="12"
+                                    Click="UninstallButton_Click"/>
 
-                    <Border Background="#FAFAFA" 
-                            CornerRadius="4" 
-                            Padding="8" 
-                            Margin="0,5,0,8"
-                            BorderBrush="#E0E0E0"
-                            BorderThickness="1">
-                        <TextBlock x:Name="FingerprintText" 
-                                   Text="Loading..." 
-                                   FontFamily="Consolas"
+                            <Button x:Name="StartButton" 
+                                    Grid.Row="2" Grid.Column="0"
+                                    Content="Start Service"
+                                    Style="{StaticResource ModernButton}"
+                                    Padding="8,8"
+                                    FontSize="12"
+                                    Click="StartButton_Click"/>
+
+                            <Button x:Name="StopButton" 
+                                    Grid.Row="2" Grid.Column="2"
+                                    Content="Stop Service"
+                                    Style="{StaticResource ModernButton}"
+                                    Background="{StaticResource WarningBrush}"
+                                    Padding="8,8"
+                                    FontSize="12"
+                                    Click="StopButton_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Configuration Card -->
+                <Border Grid.Row="3" Style="{StaticResource CardBorder}" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="Configuration" 
+                                   FontSize="13" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Margin="0,0,0,10"/>
+
+                        <Button x:Name="ManageExeButton" 
+                                Content="Manage Protected Executables"
+                                Style="{StaticResource ModernButton}"
+                                HorizontalAlignment="Stretch"
+                                Padding="8,8"
+                                FontSize="12"
+                                Click="ManageExeButton_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Hardware Info Card -->
+                <Border Grid.Row="4" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="Hardware License" 
+                                   FontSize="13" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Margin="0,0,0,6"/>
+
+                        <TextBlock Text="Hardware Fingerprint:" 
                                    FontSize="10"
-                                   TextWrapping="Wrap"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                    </Border>
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
 
-                    <Button x:Name="CopyFingerprintButton" 
-                            Content="Copy to Clipboard"
-                            Style="{StaticResource ModernButton}"
-                            HorizontalAlignment="Right"
-                            Padding="12,8"
-                            Click="CopyFingerprintButton_Click"/>
-                </StackPanel>
-            </Border>
+                        <Border Background="#FAFAFA" 
+                                CornerRadius="4" 
+                                Padding="6" 
+                                Margin="0,4,0,6"
+                                BorderBrush="#E0E0E0"
+                                BorderThickness="1">
+                            <TextBlock x:Name="FingerprintText" 
+                                       Text="Loading..." 
+                                       FontFamily="Consolas"
+                                       FontSize="9"
+                                       TextWrapping="Wrap"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+
+                        <Button x:Name="CopyFingerprintButton" 
+                                Content="Copy to Clipboard"
+                                Style="{StaticResource ModernButton}"
+                                HorizontalAlignment="Right"
+                                Padding="10,6"
+                                FontSize="11"
+                                Click="CopyFingerprintButton_Click"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Grid>
-    </ScrollViewer>
+    </Border>
 </Window>

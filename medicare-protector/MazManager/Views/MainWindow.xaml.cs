@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Forms;
 using MazManager.Services;
@@ -34,11 +35,33 @@ namespace MazManager.Views
             StartStatusMonitoring();
         }
 
+        #region Custom Title Bar Events
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 1)
+            {
+                this.DragMove();
+            }
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        #endregion
+
         private void InitializeNotifyIcon()
         {
             _notifyIcon = new NotifyIcon();
             _notifyIcon.Icon = System.Drawing.SystemIcons.Application;
-            _notifyIcon.Text = "Medicare Protection Manager";
+            _notifyIcon.Text = "Zregi Terminator";
             _notifyIcon.Visible = false;
         }
 

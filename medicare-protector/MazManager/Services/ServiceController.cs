@@ -74,11 +74,11 @@ namespace MazManager.Services
         {
             try
             {
+                // Use UseShellExecute = true to allow elevation
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = "sc.exe";
                 psi.Arguments = string.Format("start {0}", SERVICE_NAME);
-                psi.UseShellExecute = false;
-                psi.CreateNoWindow = true;
+                psi.UseShellExecute = true;
                 psi.WindowStyle = ProcessWindowStyle.Hidden;
                 psi.Verb = "runas";
 
@@ -103,11 +103,11 @@ namespace MazManager.Services
         {
             try
             {
+                // Use UseShellExecute = true to allow elevation
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = "sc.exe";
                 psi.Arguments = string.Format("stop {0}", SERVICE_NAME);
-                psi.UseShellExecute = false;
-                psi.CreateNoWindow = true;
+                psi.UseShellExecute = true;
                 psi.WindowStyle = ProcessWindowStyle.Hidden;
                 psi.Verb = "runas";
 

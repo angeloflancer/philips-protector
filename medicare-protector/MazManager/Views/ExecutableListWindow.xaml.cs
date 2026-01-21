@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
 using MazManager.Models;
 using MazManager.Services;
 using Microsoft.Win32;
@@ -32,6 +33,23 @@ namespace MazManager.Views
 
             LoadExecutables();
         }
+
+        #region Custom Title Bar Events
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 1)
+            {
+                this.DragMove();
+            }
+        }
+
+        private void CloseWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            HandleClose();
+        }
+
+        #endregion
 
         private void LoadExecutables()
         {
@@ -168,6 +186,11 @@ namespace MazManager.Views
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
+            HandleClose();
+        }
+
+        private void HandleClose()
+        {
             if (_hasChanges)
             {
                 MessageBoxResult result = MessageBox.Show(
@@ -178,15 +201,19 @@ namespace MazManager.Views
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    SaveButton_Click(sender, e);
+                    SaveButton_Click(null, null);
+                    Close();
                 }
-                else if (result == MessageBoxResult.Cancel)
+                else if (result == MessageBoxResult.No)
                 {
-                    return;
+                    Close();
                 }
+                // Cancel - do nothing
             }
-
-            Close();
+            else
+            {
+                Close();
+            }
         }
 
         private void UpdateStatus(string message)
@@ -196,21 +223,7 @@ namespace MazManager.Views
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            if (_hasChanges)
-            {
-                MessageBoxResult result = MessageBox.Show(
-                    "You have unsaved changes. Close anyway?",
-                    "Unsaved Changes",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.No)
-                {
-                    e.Cancel = true;
-                    return;
-                }
-            }
-
+            // Already handled by HandleClose, just let it close
             base.OnClosing(e);
         }
     }

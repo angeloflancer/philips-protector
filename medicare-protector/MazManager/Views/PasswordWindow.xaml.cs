@@ -13,8 +13,28 @@ namespace MazManager.Views
         {
             InitializeComponent();
             UpdateAttemptsDisplay();
-            PasswordInput.Focus();
+            
+            // Focus password input after window loads
+            this.Loaded += (s, e) => PasswordInput.Focus();
         }
+
+        #region Custom Title Bar Events
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 1)
+            {
+                this.DragMove();
+            }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+
+        #endregion
 
         private void UpdateAttemptsDisplay()
         {

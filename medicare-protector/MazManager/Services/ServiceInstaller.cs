@@ -98,12 +98,11 @@ namespace MazManager.Services
                 // Stop the service first
                 StopServiceUsingScExe();
 
-                // Delete the service
+                // Delete the service - use UseShellExecute = true for elevation
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = "sc.exe";
                 psi.Arguments = string.Format("delete {0}", SERVICE_NAME);
-                psi.UseShellExecute = false;
-                psi.CreateNoWindow = true;
+                psi.UseShellExecute = true;
                 psi.WindowStyle = ProcessWindowStyle.Hidden;
                 psi.Verb = "runas";
 
@@ -310,12 +309,12 @@ namespace MazManager.Services
 
         private bool InstallServiceUsingScExe(string exePath)
         {
+            // Use UseShellExecute = true for elevation
             ProcessStartInfo psi = new ProcessStartInfo();
             psi.FileName = "sc.exe";
-            psi.Arguments = string.Format("create {0} binPath= \"\\\"{1}\\\"\" start= auto DisplayName= \"Medicare Protection Service\"", 
+            psi.Arguments = string.Format("create {0} binPath= \"\\\"{1}\\\"\" start= auto DisplayName= \"Zregi Protection Service\"", 
                 SERVICE_NAME, exePath);
-            psi.UseShellExecute = false;
-            psi.CreateNoWindow = true;
+            psi.UseShellExecute = true;
             psi.WindowStyle = ProcessWindowStyle.Hidden;
             psi.Verb = "runas";
 
@@ -332,8 +331,7 @@ namespace MazManager.Services
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = "sc.exe";
                 psi.Arguments = string.Format("failure {0} reset= 0 actions= restart/5000/restart/10000/restart/30000", SERVICE_NAME);
-                psi.UseShellExecute = false;
-                psi.CreateNoWindow = true;
+                psi.UseShellExecute = true;
                 psi.WindowStyle = ProcessWindowStyle.Hidden;
                 psi.Verb = "runas";
 
@@ -352,8 +350,7 @@ namespace MazManager.Services
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = "sc.exe";
                 psi.Arguments = string.Format("start {0}", SERVICE_NAME);
-                psi.UseShellExecute = false;
-                psi.CreateNoWindow = true;
+                psi.UseShellExecute = true;
                 psi.WindowStyle = ProcessWindowStyle.Hidden;
                 psi.Verb = "runas";
 
@@ -372,8 +369,7 @@ namespace MazManager.Services
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = "sc.exe";
                 psi.Arguments = string.Format("stop {0}", SERVICE_NAME);
-                psi.UseShellExecute = false;
-                psi.CreateNoWindow = true;
+                psi.UseShellExecute = true;
                 psi.WindowStyle = ProcessWindowStyle.Hidden;
                 psi.Verb = "runas";
 
