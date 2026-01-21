@@ -22,6 +22,7 @@ namespace MazManager.Views
         private ObservableCollection<ProtectedExecutable> _executables;
         private bool _hasChanges;
         private DispatcherTimer _statusTimer;
+        private ServiceStatusClient _statusClient;
 
         public ExecutableListWindow(string serviceDirectory)
         {
@@ -31,6 +32,7 @@ namespace MazManager.Views
             _configEncryptor = new ConfigEncryptor();
             _executables = new ObservableCollection<ProtectedExecutable>();
             _hasChanges = false;
+            _statusClient = new ServiceStatusClient();
 
             ExecutableList.ItemsSource = _executables;
 
@@ -64,22 +66,47 @@ namespace MazManager.Views
             // Update status immediately
             UpdateAllStatuses();
 
-            // Start timer for periodic updates
+            // Start timer for periodic updates (faster interval since we're just querying service)
             _statusTimer = new DispatcherTimer();
-            _statusTimer.Interval = TimeSpan.FromSeconds(3);
+            _statusTimer.Interval = TimeSpan.FromSeconds(1);
             _statusTimer.Tick += (s, e) => UpdateAllStatuses();
             _statusTimer.Start();
         }
 
         private void UpdateAllStatuses()
         {
-            foreach (ProtectedExecutable exe in _executables)
+            try
             {
-                UpdateExecutableStatus(exe);
+                // Get running processes from the service
+                List<RunningProcessInfo> runningProcesses = _statusClient.GetRunningProcesses();
+
+                // Create a set of running full paths for fast lookup
+                HashSet<string> runningPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (RunningProcessInfo rpi in runningProcesses)
+                {
+                    if (!string.IsNullOrEmpty(rpi.FullPath))
+                    {
+                        runningPaths.Add(rpi.FullPath);
+                    }
+                }
+
+                // Update status for each executable
+                foreach (ProtectedExecutable exe in _executables)
+                {
+                    UpdateExecutableStatus(exe, runningPaths);
+                }
+            }
+            catch
+            {
+                // On error, set all to Normal
+                foreach (ProtectedExecutable exe in _executables)
+                {
+                    exe.Status = ExecutableStatus.Normal;
+                }
             }
         }
 
-        private void UpdateExecutableStatus(ProtectedExecutable exe)
+        private void UpdateExecutableStatus(ProtectedExecutable exe, HashSet<string> runningPaths)
         {
             try
             {
@@ -95,44 +122,11 @@ namespace MazManager.Views
                     }
                 }
 
-                // Check if process is running (Running status)
-                string processName = Path.GetFileNameWithoutExtension(exe.Name);
-                if (!string.IsNullOrEmpty(processName))
+                // Check if process is running according to service
+                if (runningPaths.Contains(exe.FullPath))
                 {
-                    Process[] processes = Process.GetProcessesByName(processName);
-                    
-                    if (processes.Length > 0)
-                    {
-                        // Check if any of the running processes match the full path
-                        bool foundMatch = false;
-                        foreach (Process process in processes)
-                        {
-                            try
-                            {
-                                // Try to get the process path
-                                string processPath = GetProcessPath(process);
-                                if (!string.IsNullOrEmpty(processPath) && 
-                                    string.Equals(processPath, exe.FullPath, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    foundMatch = true;
-                                    break;
-                                }
-                            }
-                            catch
-                            {
-                                // Can't access process, might be running elevated
-                                // Consider it a match if the name matches
-                                foundMatch = true;
-                                break;
-                            }
-                        }
-
-                        if (foundMatch)
-                        {
-                            exe.Status = ExecutableStatus.Running;
-                            return;
-                        }
-                    }
+                    exe.Status = ExecutableStatus.Running;
+                    return;
                 }
 
                 // Default to Normal
@@ -145,49 +139,10 @@ namespace MazManager.Views
             }
         }
 
-        private string GetProcessPath(Process process)
-        {
-            try
-            {
-                // Try MainModule first
-                if (process.MainModule != null)
-                {
-                    return process.MainModule.FileName;
-                }
-            }
-            catch
-            {
-                // MainModule may fail for elevated processes
-            }
-
-            // Try WMI as fallback
-            try
-            {
-                using (var searcher = new System.Management.ManagementObjectSearcher(
-                    string.Format("SELECT ExecutablePath FROM Win32_Process WHERE ProcessId = {0}", process.Id)))
-                {
-                    foreach (System.Management.ManagementObject obj in searcher.Get())
-                    {
-                        object path = obj["ExecutablePath"];
-                        if (path != null)
-                        {
-                            return path.ToString();
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // WMI failed
-            }
-
-            return null;
-        }
-
         private void RefreshStatusButton_Click(object sender, RoutedEventArgs e)
         {
             UpdateAllStatuses();
-            UpdateStatus("Status refreshed.");
+            UpdateStatus("Status refreshed from service.");
         }
 
         #endregion
@@ -244,11 +199,11 @@ namespace MazManager.Views
                             newExe.Status = ExecutableStatus.Normal;
                             _executables.Add(newExe);
                             _hasChanges = true;
-                            
-                            // Update status for the new executable
-                            UpdateExecutableStatus(newExe);
                         }
                     }
+
+                    // Update all statuses after adding
+                    UpdateAllStatuses();
 
                     UpdateStatus("Added executable(s). Don't forget to save!");
                 }

@@ -89,6 +89,7 @@
     <Compile Include="Services\ServiceInstaller.cs" />
     <Compile Include="Services\ServiceController.cs" />
     <Compile Include="Services\ConfigEncryptor.cs" />
+    <Compile Include="Services\ServiceStatusClient.cs" />
     <Compile Include="PasswordManager.cs" />
     <Compile Include="HardwareFingerprint.cs" />
     <Compile Include="LicenseGenerator.cs" />
