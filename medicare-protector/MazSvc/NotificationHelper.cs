@@ -46,6 +46,7 @@ namespace MazSvc
         private const int MB_ICONWARNING = 0x00000030;
         private const int MB_ICONERROR = 0x00000010;
         private const int MB_SYSTEMMODAL = 0x00001000;
+        private const int MB_TOPMOST = 0x00040000; // Show on top but not system modal
 
         [StructLayout(LayoutKind.Sequential)]
         private struct WTS_SESSION_INFO
@@ -159,7 +160,9 @@ namespace MazSvc
         {
             try
             {
-                int style = MB_OK | MB_SYSTEMMODAL;
+                // Use MB_TOPMOST instead of MB_SYSTEMMODAL for less intrusive notification
+                // Similar to balloon notifications - shows on top but doesn't block
+                int style = MB_OK | MB_TOPMOST;
 
                 switch (type)
                 {
@@ -183,7 +186,7 @@ namespace MazSvc
                     message,
                     message.Length * 2, // Unicode string length in bytes
                     style,
-                    10, // Timeout in seconds (0 for no timeout, but we use 10 to not block)
+                    5, // Timeout in seconds - auto-dismiss after 5 seconds (like balloon tip)
                     out response,
                     false); // Don't wait for response
             }

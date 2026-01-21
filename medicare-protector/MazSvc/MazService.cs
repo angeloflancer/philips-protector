@@ -123,21 +123,21 @@ namespace MazSvc
                 // Create a unique key for this process
                 string processKey = string.Format("{0}|{1}", processInfo.ProcessId, processInfo.FullPath);
 
+                // Show notification when protected program is detected (only once per process)
+                if (!_notifiedProcesses.Contains(processKey))
+                {
+                    _notifiedProcesses.Add(processKey);
+                    string exeName = Path.GetFileName(processInfo.FullPath);
+                    _notificationHelper.ShowNotification(
+                        "Zregi Terminator",
+                        string.Format("Protected application '{0}' is running.", exeName),
+                        NotificationType.Information);
+                }
+
                 // Check license validity
                 bool licenseValid = CheckLicenseValidity();
 
-                if (licenseValid)
-                {
-                    // Only notify once per process
-                    if (!_notifiedProcesses.Contains(processKey))
-                    {
-                        _notifiedProcesses.Add(processKey);
-                        _notificationHelper.ShowNotification(
-                            "License Valid",
-                            "Protected application is authorized to run.");
-                    }
-                }
-                else
+                if (!licenseValid)
                 {
                     // License is invalid - take action
                     HandleInvalidLicense(processInfo);

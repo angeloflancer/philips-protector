@@ -30,8 +30,7 @@ namespace MazManager.Views
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
-            Close();
+            Application.Current.Shutdown();
         }
 
         #endregion
@@ -88,8 +87,11 @@ namespace MazManager.Views
                     PasswordManager.SetRememberMe(false);
                 }
 
-                DialogResult = true;
-                Close();
+                // Open MainWindow and close this window
+                MainWindow mainWindow = new MainWindow();
+                Application.Current.MainWindow = mainWindow;
+                mainWindow.Show();
+                this.Close();
             }
             else
             {
@@ -110,8 +112,7 @@ namespace MazManager.Views
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
 
-                    DialogResult = false;
-                    Close();
+                    Application.Current.Shutdown();
                     return;
                 }
 
@@ -139,12 +140,28 @@ namespace MazManager.Views
             ErrorText.Visibility = Visibility.Visible;
         }
 
+        private void HideError()
+        {
+            ErrorText.Visibility = Visibility.Collapsed;
+        }
+
         private void PasswordInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 ValidatePassword();
             }
+            else
+            {
+                // Hide error when user starts typing
+                HideError();
+            }
+        }
+
+        private void PasswordInput_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            // Hide error when user changes password
+            HideError();
         }
 
         private void PasswordTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -153,6 +170,17 @@ namespace MazManager.Views
             {
                 ValidatePassword();
             }
+            else
+            {
+                // Hide error when user starts typing
+                HideError();
+            }
+        }
+
+        private void PasswordTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            // Hide error when user changes text
+            HideError();
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
@@ -162,8 +190,7 @@ namespace MazManager.Views
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
-            Close();
+            Application.Current.Shutdown();
         }
     }
 }

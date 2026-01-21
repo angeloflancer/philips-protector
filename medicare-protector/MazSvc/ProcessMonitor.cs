@@ -53,7 +53,11 @@ namespace MazSvc
                                 processPath = GetProcessPath(process);
                                 if (!string.IsNullOrEmpty(processPath))
                                 {
-                                    if (string.Equals(processPath, exe.FullPath, StringComparison.OrdinalIgnoreCase))
+                                    // Normalize paths for comparison (remove trailing backslashes, etc.)
+                                    string normalizedProcessPath = Path.GetFullPath(processPath).TrimEnd('\\');
+                                    string normalizedExePath = Path.GetFullPath(exe.FullPath).TrimEnd('\\');
+                                    
+                                    if (string.Equals(normalizedProcessPath, normalizedExePath, StringComparison.OrdinalIgnoreCase))
                                     {
                                         pathMatches = true;
                                     }
@@ -61,12 +65,15 @@ namespace MazSvc
                             }
                             catch
                             {
-                                // Cannot access process path (likely access denied)
-                                // Still check by name only
+                                // Cannot access process path (likely access denied or elevated process)
+                                // Will match by name only if name matches
+                                processPath = null;
                             }
 
-                            // Match if both name AND path match, or just name if path couldn't be retrieved
-                            if (nameMatches && (pathMatches || processPath == null))
+                            // Match if:
+                            // 1. Name matches AND path matches, OR
+                            // 2. Name matches AND we couldn't get the path (elevated/admin process)
+                            if (nameMatches && (pathMatches || string.IsNullOrEmpty(processPath)))
                             {
                                 ProcessInfo info = new ProcessInfo();
                                 info.ProcessId = process.Id;
@@ -104,12 +111,27 @@ namespace MazSvc
 
         /// <summary>
         /// Gets the full path of a process executable
+        /// Works for both normal and elevated (administrator) processes
         /// </summary>
         private string GetProcessPath(Process process)
         {
+            // Try WMI first - works better for elevated processes
             try
             {
-                // Try MainModule first (requires appropriate permissions)
+                string wmiPath = GetProcessPathFromWmi(process.Id);
+                if (!string.IsNullOrEmpty(wmiPath))
+                {
+                    return wmiPath;
+                }
+            }
+            catch
+            {
+                // WMI failed, try MainModule
+            }
+
+            // Try MainModule as fallback (works for non-elevated processes)
+            try
+            {
                 if (process.MainModule != null && !string.IsNullOrEmpty(process.MainModule.FileName))
                 {
                     return process.MainModule.FileName;
@@ -117,18 +139,10 @@ namespace MazSvc
             }
             catch
             {
-                // MainModule access denied, try alternative methods
+                // MainModule access denied (likely elevated process)
             }
 
-            // Try using WMI as fallback
-            try
-            {
-                return GetProcessPathFromWmi(process.Id);
-            }
-            catch
-            {
-                return null;
-            }
+            return null;
         }
 
         /// <summary>

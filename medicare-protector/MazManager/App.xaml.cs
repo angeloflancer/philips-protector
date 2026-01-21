@@ -24,25 +24,18 @@ namespace MazManager
                 // Check if password is remembered
                 if (PasswordManager.IsRemembered())
                 {
-                    // Skip password dialog, show main window
-                    ShowMainWindow();
+                    // Skip password dialog, show main window directly
+                    MainWindow mainWindow = new MainWindow();
+                    this.MainWindow = mainWindow;
+                    mainWindow.Show();
                     return;
                 }
 
-                // Show password dialog
+                // Show password window (as a regular window, not dialog)
                 PasswordWindow passwordWindow = new PasswordWindow();
-                bool? result = passwordWindow.ShowDialog();
-
-                if (result == true)
-                {
-                    // Password validated successfully
-                    ShowMainWindow();
-                }
-                else
-                {
-                    // Password dialog cancelled or failed
-                    Shutdown();
-                }
+                this.MainWindow = passwordWindow;
+                this.ShutdownMode = ShutdownMode.OnMainWindowClose;
+                passwordWindow.Show();
             }
             catch (Exception ex)
             {
@@ -53,17 +46,6 @@ namespace MazManager
                     MessageBoxImage.Error);
                 Shutdown();
             }
-        }
-
-        private void ShowMainWindow()
-        {
-            MainWindow mainWindow = new MainWindow();
-            
-            // Set as the main window and switch shutdown mode
-            this.MainWindow = mainWindow;
-            this.ShutdownMode = ShutdownMode.OnMainWindowClose;
-            
-            mainWindow.Show();
         }
     }
 }

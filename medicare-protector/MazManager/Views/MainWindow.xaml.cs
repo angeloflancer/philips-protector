@@ -354,8 +354,7 @@ namespace MazManager.Views
                 }
 
                 ExecutableListWindow exeWindow = new ExecutableListWindow(serviceDirectory);
-                exeWindow.Owner = this;
-                exeWindow.ShowDialog();
+                exeWindow.Show();
             }
             catch (Exception ex)
             {

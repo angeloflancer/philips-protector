@@ -4,24 +4,12 @@
         Title="Zregi Terminator" 
         Height="600" Width="480"
         WindowStartupLocation="CenterScreen"
-        Background="Transparent"
+        Background="#F5F5F5"
         WindowStyle="None"
-        ResizeMode="NoResize"
-        AllowsTransparency="True">
+        ResizeMode="NoResize">
     
-    <!-- Outer container with margin for shadow -->
-    <Border Margin="10" 
-            Background="{StaticResource BackgroundBrush}"
-            CornerRadius="8"
-            BorderBrush="#707070"
-            BorderThickness="1">
-        <Border.Effect>
-            <DropShadowEffect Color="Black" 
-                            Direction="270" 
-                            ShadowDepth="3" 
-                            BlurRadius="10" 
-                            Opacity="0.3"/>
-        </Border.Effect>
+    <!-- Main Border -->
+    <Border Background="#F5F5F5" BorderBrush="#707070" BorderThickness="1">
         
         <Grid>
             <Grid.RowDefinitions>
@@ -29,10 +17,9 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Custom Title Bar with rounded top corners -->
+            <!-- Custom Title Bar -->
             <Border Grid.Row="0" 
-                    Background="{StaticResource PrimaryBrush}"
-                    CornerRadius="7,7,0,0"
+                    Background="#2196F3"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
                     <TextBlock Text="Zregi Terminator" 

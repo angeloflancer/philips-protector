@@ -368,14 +368,14 @@
                                     BorderThickness="1"
                                     CornerRadius="3"
                                     VerticalAlignment="Center">
-                                <TextBlock x:Name="checkMark" 
-                                           Text="✓" 
-                                           FontSize="11" 
-                                           FontWeight="Bold"
-                                           Foreground="White"
-                                           HorizontalAlignment="Center" 
-                                           VerticalAlignment="Center"
-                                           Visibility="Collapsed"/>
+                                <Path x:Name="checkMark" 
+                                      Data="M 3,7 L 6,10 L 13,3" 
+                                      Stroke="White" 
+                                      StrokeThickness="2"
+                                      HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center"
+                                      Visibility="Collapsed"
+                                      Stretch="Uniform"/>
                             </Border>
                             <ContentPresenter Margin="6,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
