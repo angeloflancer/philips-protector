@@ -8,7 +8,6 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using MazManager.Models;
 using MazManager.Services;
-using MazManager.Helpers;
 using Microsoft.Win32;
 
 namespace MazManager.Views
@@ -27,9 +26,6 @@ namespace MazManager.Views
         public ExecutableListWindow(string serviceDirectory)
         {
             InitializeComponent();
-            
-            // Enable rounded corners (Windows XP compatible)
-            WindowHelper.EnableRoundedCorners(this, 10);
 
             _serviceDirectory = serviceDirectory;
             _configEncryptor = new ConfigEncryptor();

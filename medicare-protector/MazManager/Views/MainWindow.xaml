@@ -2,15 +2,26 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Zregi Terminator" 
-        Height="580" Width="460"
+        Height="600" Width="480"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BackgroundBrush}"
+        Background="Transparent"
         WindowStyle="None"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        AllowsTransparency="True">
     
-    <!-- Main Border -->
-    <Border Background="{StaticResource BackgroundBrush}" 
-            BorderThickness="0">
+    <!-- Outer container with margin for shadow -->
+    <Border Margin="10" 
+            Background="{StaticResource BackgroundBrush}"
+            CornerRadius="8"
+            BorderBrush="#707070"
+            BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" 
+                            Direction="270" 
+                            ShadowDepth="3" 
+                            BlurRadius="10" 
+                            Opacity="0.3"/>
+        </Border.Effect>
         
         <Grid>
             <Grid.RowDefinitions>
@@ -18,9 +29,10 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Custom Title Bar -->
+            <!-- Custom Title Bar with rounded top corners -->
             <Border Grid.Row="0" 
                     Background="{StaticResource PrimaryBrush}"
+                    CornerRadius="7,7,0,0"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
                     <TextBlock Text="Zregi Terminator" 
