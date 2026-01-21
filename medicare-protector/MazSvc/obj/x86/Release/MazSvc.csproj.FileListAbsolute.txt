@@ -1,0 +1,5 @@
+c:\Project\philips-protector\medicare-protector\MazSvc\bin\Release\x86\MazSvc.exe
+c:\Project\philips-protector\medicare-protector\MazSvc\bin\Release\x86\MazSvc.pdb
+c:\Project\philips-protector\medicare-protector\MazSvc\obj\x86\Release\MazSvc.csprojResolveAssemblyReference.cache
+c:\Project\philips-protector\medicare-protector\MazSvc\obj\x86\Release\MazSvc.exe
+c:\Project\philips-protector\medicare-protector\MazSvc\obj\x86\Release\MazSvc.pdb

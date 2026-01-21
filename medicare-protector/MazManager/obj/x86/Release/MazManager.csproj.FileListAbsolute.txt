@@ -1,0 +1,15 @@
+c:\Project\philips-protector\medicare-protector\MazManager\bin\Release\x86\MazManager.exe
+c:\Project\philips-protector\medicare-protector\MazManager\bin\Release\x86\MazManager.pdb
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\MazManager.csprojResolveAssemblyReference.cache
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\Views\MainWindow.baml
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\Views\PasswordWindow.baml
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\Views\ExecutableListWindow.baml
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\App.baml
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\Views\MainWindow.g.cs
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\Views\PasswordWindow.g.cs
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\Views\ExecutableListWindow.g.cs
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\App.g.cs
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\MazManager_MarkupCompile.cache
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\MazManager.g.resources
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\MazManager.exe
+c:\Project\philips-protector\medicare-protector\MazManager\obj\x86\Release\MazManager.pdb

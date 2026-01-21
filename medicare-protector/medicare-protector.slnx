@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="MazSvc\MazSvc.csproj" />
+  <Project Path="MazManager\MazManager.csproj" />
+</Solution>
