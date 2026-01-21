@@ -4,7 +4,8 @@
         Title="Manage Protected Executables" 
         Height="480" Width="620"
         WindowStartupLocation="CenterOwner"
-        Background="{StaticResource BackgroundBrush}"
+        Background="Transparent"
+        AllowsTransparency="True"
         WindowStyle="None"
         ResizeMode="NoResize">
 
@@ -52,10 +53,14 @@
         </DataTemplate>
     </Window.Resources>
 
-    <!-- Main Border -->
+    <!-- Main Border with rounded corners -->
     <Border Background="{StaticResource BackgroundBrush}" 
-            BorderBrush="{StaticResource BorderBrush}" 
-            BorderThickness="1">
+            CornerRadius="8"
+            BorderThickness="0"
+            Margin="10">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="3" Opacity="0.5" Color="Black"/>
+        </Border.Effect>
         
         <Grid>
             <Grid.RowDefinitions>
@@ -66,6 +71,7 @@
             <!-- Custom Title Bar -->
             <Border Grid.Row="0" 
                     Background="{StaticResource PrimaryBrush}"
+                    CornerRadius="8,8,0,0"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
                     <TextBlock Text="Manage Protected Executables" 
@@ -81,8 +87,9 @@
                                 VerticalAlignment="Center"
                                 Margin="0,0,4,0">
                         <Button x:Name="CloseWindowButton" 
-                                Content="✕" 
+                                Content="X" 
                                 Width="32" Height="28"
+                                FontWeight="Bold"
                                 Style="{StaticResource CloseButtonStyle}"
                                 Click="CloseWindowButton_Click"/>
                     </StackPanel>
@@ -123,12 +130,14 @@
                                   Grid.Row="0"
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BorderBrush}"
-                                  Background="White">
+                                  Background="White"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto">
                             <ListView.View>
-                                <GridView>
+                                <GridView AllowsColumnReorder="False">
                                     <GridViewColumn Header="Name" Width="100" DisplayMemberBinding="{Binding Name}"/>
-                                    <GridViewColumn Header="Full Path" Width="360" DisplayMemberBinding="{Binding FullPath}"/>
-                                    <GridViewColumn Header="Status" Width="90" CellTemplate="{StaticResource StatusCellTemplate}"/>
+                                    <GridViewColumn Header="Full Path" Width="340" DisplayMemberBinding="{Binding FullPath}"/>
+                                    <GridViewColumn Header="Status" Width="102" CellTemplate="{StaticResource StatusCellTemplate}"/>
                                 </GridView>
                             </ListView.View>
                         </ListView>

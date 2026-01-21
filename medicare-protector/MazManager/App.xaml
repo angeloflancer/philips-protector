@@ -316,10 +316,12 @@
         <!-- Modern PasswordBox Style -->
         <Style TargetType="PasswordBox">
             <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="8,6"/>
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CaretBrush" Value="{StaticResource TextPrimaryBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="PasswordBox">
@@ -430,13 +432,13 @@
 
         <!-- GridViewColumnHeader Style -->
         <Style TargetType="GridViewColumnHeader">
-            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Padding" Value="8,6"/>
-            <Setter Property="BorderThickness" Value="0,0,1,0"/>
-            <Setter Property="BorderBrush" Value="{StaticResource PrimaryDarkBrush}"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -451,10 +453,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="HeaderBorder" Property="Background" Value="{StaticResource PrimaryDarkBrush}"/>
+                                <Setter TargetName="HeaderBorder" Property="Background" Value="#F5F5F5"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="HeaderBorder" Property="Background" Value="#0D47A1"/>
+                                <Setter TargetName="HeaderBorder" Property="Background" Value="#EEEEEE"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
