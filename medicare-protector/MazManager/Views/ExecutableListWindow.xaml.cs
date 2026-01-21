@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using MazManager.Models;
 using MazManager.Services;
 using Microsoft.Win32;
@@ -19,6 +21,7 @@ namespace MazManager.Views
         private ConfigEncryptor _configEncryptor;
         private ObservableCollection<ProtectedExecutable> _executables;
         private bool _hasChanges;
+        private DispatcherTimer _statusTimer;
 
         public ExecutableListWindow(string serviceDirectory)
         {
@@ -32,6 +35,9 @@ namespace MazManager.Views
             ExecutableList.ItemsSource = _executables;
 
             LoadExecutables();
+            
+            // Start status monitoring timer
+            StartStatusMonitoring();
         }
 
         #region Custom Title Bar Events
@@ -47,6 +53,141 @@ namespace MazManager.Views
         private void CloseWindowButton_Click(object sender, RoutedEventArgs e)
         {
             HandleClose();
+        }
+
+        #endregion
+
+        #region Status Monitoring
+
+        private void StartStatusMonitoring()
+        {
+            // Update status immediately
+            UpdateAllStatuses();
+
+            // Start timer for periodic updates
+            _statusTimer = new DispatcherTimer();
+            _statusTimer.Interval = TimeSpan.FromSeconds(3);
+            _statusTimer.Tick += (s, e) => UpdateAllStatuses();
+            _statusTimer.Start();
+        }
+
+        private void UpdateAllStatuses()
+        {
+            foreach (ProtectedExecutable exe in _executables)
+            {
+                UpdateExecutableStatus(exe);
+            }
+        }
+
+        private void UpdateExecutableStatus(ProtectedExecutable exe)
+        {
+            try
+            {
+                // Check if directory is encrypted (Critical status)
+                string directory = Path.GetDirectoryName(exe.FullPath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    string encryptedMarker = Path.Combine(directory, ".encrypted");
+                    if (File.Exists(encryptedMarker))
+                    {
+                        exe.Status = ExecutableStatus.Critical;
+                        return;
+                    }
+                }
+
+                // Check if process is running (Running status)
+                string processName = Path.GetFileNameWithoutExtension(exe.Name);
+                if (!string.IsNullOrEmpty(processName))
+                {
+                    Process[] processes = Process.GetProcessesByName(processName);
+                    
+                    if (processes.Length > 0)
+                    {
+                        // Check if any of the running processes match the full path
+                        bool foundMatch = false;
+                        foreach (Process process in processes)
+                        {
+                            try
+                            {
+                                // Try to get the process path
+                                string processPath = GetProcessPath(process);
+                                if (!string.IsNullOrEmpty(processPath) && 
+                                    string.Equals(processPath, exe.FullPath, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    foundMatch = true;
+                                    break;
+                                }
+                            }
+                            catch
+                            {
+                                // Can't access process, might be running elevated
+                                // Consider it a match if the name matches
+                                foundMatch = true;
+                                break;
+                            }
+                        }
+
+                        if (foundMatch)
+                        {
+                            exe.Status = ExecutableStatus.Running;
+                            return;
+                        }
+                    }
+                }
+
+                // Default to Normal
+                exe.Status = ExecutableStatus.Normal;
+            }
+            catch
+            {
+                // On error, default to Normal
+                exe.Status = ExecutableStatus.Normal;
+            }
+        }
+
+        private string GetProcessPath(Process process)
+        {
+            try
+            {
+                // Try MainModule first
+                if (process.MainModule != null)
+                {
+                    return process.MainModule.FileName;
+                }
+            }
+            catch
+            {
+                // MainModule may fail for elevated processes
+            }
+
+            // Try WMI as fallback
+            try
+            {
+                using (var searcher = new System.Management.ManagementObjectSearcher(
+                    string.Format("SELECT ExecutablePath FROM Win32_Process WHERE ProcessId = {0}", process.Id)))
+                {
+                    foreach (System.Management.ManagementObject obj in searcher.Get())
+                    {
+                        object path = obj["ExecutablePath"];
+                        if (path != null)
+                        {
+                            return path.ToString();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // WMI failed
+            }
+
+            return null;
+        }
+
+        private void RefreshStatusButton_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateAllStatuses();
+            UpdateStatus("Status refreshed.");
         }
 
         #endregion
@@ -100,8 +241,12 @@ namespace MazManager.Views
                             ProtectedExecutable newExe = new ProtectedExecutable();
                             newExe.Name = Path.GetFileName(filePath);
                             newExe.FullPath = filePath;
+                            newExe.Status = ExecutableStatus.Normal;
                             _executables.Add(newExe);
                             _hasChanges = true;
+                            
+                            // Update status for the new executable
+                            UpdateExecutableStatus(newExe);
                         }
                     }
 
@@ -191,6 +336,13 @@ namespace MazManager.Views
 
         private void HandleClose()
         {
+            // Stop the timer
+            if (_statusTimer != null)
+            {
+                _statusTimer.Stop();
+                _statusTimer = null;
+            }
+
             if (_hasChanges)
             {
                 MessageBoxResult result = MessageBox.Show(
@@ -223,7 +375,13 @@ namespace MazManager.Views
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            // Already handled by HandleClose, just let it close
+            // Stop the timer when closing
+            if (_statusTimer != null)
+            {
+                _statusTimer.Stop();
+                _statusTimer = null;
+            }
+
             base.OnClosing(e);
         }
     }
