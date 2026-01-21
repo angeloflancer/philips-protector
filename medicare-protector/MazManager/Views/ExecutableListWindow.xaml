@@ -4,8 +4,7 @@
         Title="Manage Protected Executables" 
         Height="480" Width="620"
         WindowStartupLocation="CenterOwner"
-        Background="Transparent"
-        AllowsTransparency="True"
+        Background="{StaticResource BackgroundBrush}"
         WindowStyle="None"
         ResizeMode="NoResize">
 
@@ -53,14 +52,9 @@
         </DataTemplate>
     </Window.Resources>
 
-    <!-- Main Border with rounded corners -->
+    <!-- Main Border -->
     <Border Background="{StaticResource BackgroundBrush}" 
-            CornerRadius="8"
-            BorderThickness="0"
-            Margin="10">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="20" ShadowDepth="3" Opacity="0.5" Color="Black"/>
-        </Border.Effect>
+            BorderThickness="0">
         
         <Grid>
             <Grid.RowDefinitions>
@@ -71,7 +65,6 @@
             <!-- Custom Title Bar -->
             <Border Grid.Row="0" 
                     Background="{StaticResource PrimaryBrush}"
-                    CornerRadius="8,8,0,0"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
                     <TextBlock Text="Manage Protected Executables" 

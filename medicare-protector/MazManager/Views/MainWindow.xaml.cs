@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Forms;
 using MazManager.Services;
+using MazManager.Helpers;
 using MessageBox = System.Windows.MessageBox;
 
 namespace MazManager.Views
@@ -21,6 +22,9 @@ namespace MazManager.Views
         public MainWindow()
         {
             InitializeComponent();
+            
+            // Enable rounded corners (Windows XP compatible)
+            WindowHelper.EnableRoundedCorners(this, 10);
             
             _serviceController = new ServiceController();
             _serviceInstaller = new ServiceInstaller();

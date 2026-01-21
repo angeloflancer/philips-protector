@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Input;
+using MazManager.Helpers;
 
 namespace MazManager.Views
 {
@@ -13,6 +14,9 @@ namespace MazManager.Views
         {
             InitializeComponent();
             UpdateAttemptsDisplay();
+            
+            // Enable rounded corners (Windows XP compatible)
+            WindowHelper.EnableRoundedCorners(this, 10);
             
             // Focus password input after window loads
             this.Loaded += (s, e) => PasswordInput.Focus();

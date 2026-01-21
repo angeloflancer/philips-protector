@@ -94,6 +94,7 @@
     <Compile Include="LicenseGenerator.cs" />
     <Compile Include="Models\HardwareInfo.cs" />
     <Compile Include="Models\ProtectedExecutable.cs" />
+    <Compile Include="Helpers\WindowHelper.cs" />
     <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
 
