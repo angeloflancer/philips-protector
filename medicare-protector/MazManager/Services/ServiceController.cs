@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.ServiceProcess;
+using System.Text;
 using Microsoft.Win32;
 
 namespace MazManager.Services
@@ -85,6 +86,135 @@ namespace MazManager.Services
         }
 
         /// <summary>
+        /// Gets detailed diagnostics about why the service might fail to start
+        /// </summary>
+        private string GetServiceDiagnostics()
+        {
+            StringBuilder issues = new StringBuilder();
+            
+            try
+            {
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(SERVICE_REGISTRY_KEY))
+                {
+                    if (key == null)
+                    {
+                        issues.AppendLine("- Service registry key not found");
+                        return issues.ToString();
+                    }
+
+                    // Check ImagePath
+                    object imagePathObj = key.GetValue("ImagePath");
+                    if (imagePathObj == null)
+                    {
+                        issues.AppendLine("- Service ImagePath not configured");
+                    }
+                    else
+                    {
+                        string exePath = imagePathObj.ToString().Trim('"');
+                        
+                        if (!File.Exists(exePath))
+                        {
+                            issues.AppendLine(string.Format("- Service executable not found: {0}", exePath));
+                        }
+                        else
+                        {
+                            // Check if file is blocked
+                            try
+                            {
+                                using (FileStream fs = File.Open(exePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                {
+                                    // File can be opened
+                                }
+                            }
+                            catch (UnauthorizedAccessException)
+                            {
+                                issues.AppendLine(string.Format("- Access denied to service executable: {0}", exePath));
+                            }
+                            catch (Exception ex)
+                            {
+                                issues.AppendLine(string.Format("- Cannot access service executable: {0} ({1})", exePath, ex.Message));
+                            }
+                        }
+                    }
+
+                    // Check Start type
+                    object startObj = key.GetValue("Start");
+                    if (startObj != null)
+                    {
+                        int startType = Convert.ToInt32(startObj);
+                        if (startType == 4) // Disabled
+                        {
+                            issues.AppendLine("- Service is DISABLED. Change startup type to Manual or Automatic.");
+                        }
+                    }
+
+                    // Check ObjectName (service account)
+                    object objectNameObj = key.GetValue("ObjectName");
+                    if (objectNameObj != null)
+                    {
+                        string account = objectNameObj.ToString();
+                        if (account != "LocalSystem")
+                        {
+                            issues.AppendLine(string.Format("- Service runs as '{0}' (expected LocalSystem)", account));
+                        }
+                    }
+                }
+
+                // Check Event Log for recent errors
+                try
+                {
+                    EventLog appLog = new EventLog("Application");
+                    DateTime cutoff = DateTime.Now.AddHours(-1);
+                    
+                    int errorCount = 0;
+                    string lastError = "";
+                    
+                    for (int i = appLog.Entries.Count - 1; i >= 0 && i >= appLog.Entries.Count - 50; i--)
+                    {
+                        EventLogEntry entry = appLog.Entries[i];
+                        if (entry.TimeGenerated > cutoff &&
+                            entry.EntryType == EventLogEntryType.Error &&
+                            (entry.Source.Contains("MazSvc") || entry.Source.Contains("Service Control Manager")))
+                        {
+                            if (entry.Message.Contains("MazSvc") || entry.Message.Contains(SERVICE_NAME))
+                            {
+                                errorCount++;
+                                if (string.IsNullOrEmpty(lastError))
+                                {
+                                    lastError = entry.Message;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (errorCount > 0)
+                    {
+                        issues.AppendLine(string.Format("- {0} recent error(s) in Event Log", errorCount));
+                        if (!string.IsNullOrEmpty(lastError))
+                        {
+                            // Truncate to first 200 chars
+                            if (lastError.Length > 200)
+                            {
+                                lastError = lastError.Substring(0, 200) + "...";
+                            }
+                            issues.AppendLine(string.Format("  Last error: {0}", lastError.Replace("\r\n", " ").Replace("\n", " ")));
+                        }
+                    }
+                }
+                catch
+                {
+                    // Event log check failed
+                }
+            }
+            catch
+            {
+                // Diagnostics failed
+            }
+
+            return issues.ToString();
+        }
+
+        /// <summary>
         /// Starts the service
         /// </summary>
         public bool StartService()
@@ -124,6 +254,13 @@ namespace MazManager.Services
                     }
                     
                     throw new Exception("Service is not installed. Please install the service first.");
+                }
+
+                // Run diagnostics to identify potential issues
+                string diagnostics = GetServiceDiagnostics();
+                if (!string.IsNullOrEmpty(diagnostics))
+                {
+                    throw new Exception("Service startup diagnostics found issues:\n\n" + diagnostics);
                 }
 
                 // Try using ServiceController first (doesn't require elevation prompt)

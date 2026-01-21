@@ -87,22 +87,57 @@ namespace MazManager.Services
                     throw new Exception("Failed to create license file: " + ex.Message);
                 }
 
-                // Set hidden + system + readonly attributes
-                SetSystemHiddenAttributes(installDir);
-                SetSystemHiddenAttributes(destExePath);
+                // Verify the executable exists and is accessible before installing
+                if (!File.Exists(destExePath))
+                {
+                    throw new Exception("Service executable was not copied successfully: " + destExePath);
+                }
+
+                // Make sure file is NOT read-only before installation (sc.exe needs to access it)
+                try
+                {
+                    FileInfo fileInfo = new FileInfo(destExePath);
+                    if ((fileInfo.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                    {
+                        fileInfo.Attributes = fileInfo.Attributes & ~FileAttributes.ReadOnly;
+                    }
+                }
+                catch
+                {
+                    // Continue even if attribute removal fails
+                }
+
+                // Set hidden + system attributes on directory (but NOT readonly yet)
+                try
+                {
+                    DirectoryInfo dirInfo = new DirectoryInfo(installDir);
+                    dirInfo.Attributes = FileAttributes.Hidden | FileAttributes.System;
+                }
+                catch
+                {
+                }
 
                 // Save install location to registry
                 SaveInstallLocation(installDir);
 
-                // Install service using sc.exe
-                bool installed = InstallServiceUsingScExe(destExePath);
-                if (!installed)
+                // Install service using sc.exe (file must NOT be readonly for this to work)
+                InstallServiceUsingScExe(destExePath);
+
+                // NOW set readonly attribute after service is installed
+                try
                 {
-                    throw new Exception("sc.exe create command failed. Service may already exist or insufficient permissions.");
+                    FileInfo fileInfo = new FileInfo(destExePath);
+                    fileInfo.Attributes = fileInfo.Attributes | FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System;
+                }
+                catch
+                {
                 }
 
                 // Configure recovery options
                 ConfigureRecoveryOptions();
+
+                // Register service for Safe Mode operation
+                RegisterForSafeMode();
 
                 // Start the service
                 StartServiceUsingScExe();
@@ -184,6 +219,9 @@ namespace MazManager.Services
                 catch
                 {
                 }
+
+                // Remove Safe Mode registry entries
+                UnregisterFromSafeMode();
 
                 return true;
             }
@@ -431,13 +469,25 @@ namespace MazManager.Services
 
         private bool InstallServiceUsingScExe(string exePath)
         {
-            // Use UseShellExecute = true for elevation
+            // Verify file exists before attempting installation
+            if (!File.Exists(exePath))
+            {
+                throw new Exception("Service executable does not exist: " + exePath);
+            }
+
+            // Properly escape the path for sc.exe
+            // sc.exe format: sc create ServiceName binPath= "C:\Path\To\File.exe" start= auto
+            // The path must be in quotes, and we need to escape quotes properly
+            string escapedPath = exePath.Replace("\"", "\"\"");
+            string arguments = string.Format("create {0} binPath= \"{1}\" start= auto DisplayName= \"Zregi Protection Service\"", 
+                SERVICE_NAME, escapedPath);
+
             ProcessStartInfo psi = new ProcessStartInfo();
             psi.FileName = "sc.exe";
-            psi.Arguments = string.Format("create {0} binPath= \"\\\"{1}\\\"\" start= auto DisplayName= \"Zregi Protection Service\"", 
-                SERVICE_NAME, exePath);
+            psi.Arguments = arguments;
             psi.UseShellExecute = true;
             psi.WindowStyle = ProcessWindowStyle.Hidden;
+            psi.CreateNoWindow = true;
             
             // Only use runas on Vista and later (XP doesn't have UAC)
             if (Environment.OSVersion.Version.Major >= 6)
@@ -448,11 +498,35 @@ namespace MazManager.Services
             Process process = Process.Start(psi);
             if (process == null)
             {
-                return false;
+                throw new Exception("Failed to start sc.exe process. Insufficient permissions.");
             }
+            
             process.WaitForExit(30000);
 
-            return process.ExitCode == 0;
+            if (process.ExitCode != 0)
+            {
+                // Exit code 2 = file not found
+                // Exit code 5 = access denied
+                // Exit code 1058 = service already exists
+                string errorMsg = string.Format("sc.exe create failed with exit code {0}", process.ExitCode);
+                
+                if (process.ExitCode == 2)
+                {
+                    errorMsg += string.Format(". The service executable path may be incorrect or the file is inaccessible.\n\nPath: {0}\n\nMake sure the file exists and is not blocked by antivirus.", exePath);
+                }
+                else if (process.ExitCode == 5)
+                {
+                    errorMsg += ". Access denied. Make sure you are running as Administrator.";
+                }
+                else if (process.ExitCode == 1058)
+                {
+                    errorMsg += ". Service already exists. Please uninstall it first.";
+                }
+                
+                throw new Exception(errorMsg);
+            }
+
+            return true;
         }
 
         private void ConfigureRecoveryOptions()
@@ -476,6 +550,66 @@ namespace MazManager.Services
                 {
                     process.WaitForExit(30000);
                 }
+            }
+            catch
+            {
+            }
+        }
+
+        /// <summary>
+        /// Registers the service to run in Windows Safe Mode
+        /// This adds registry entries so the service can start in Safe Mode
+        /// </summary>
+        private void RegisterForSafeMode()
+        {
+            try
+            {
+                // Register for Safe Mode (Minimal)
+                using (RegistryKey key = Registry.LocalMachine.CreateSubKey(
+                    @"SYSTEM\CurrentControlSet\Control\SafeBoot\Minimal\" + SERVICE_NAME))
+                {
+                    if (key != null)
+                    {
+                        key.SetValue("", "Service", RegistryValueKind.String);
+                    }
+                }
+
+                // Register for Safe Mode with Networking
+                using (RegistryKey key = Registry.LocalMachine.CreateSubKey(
+                    @"SYSTEM\CurrentControlSet\Control\SafeBoot\Network\" + SERVICE_NAME))
+                {
+                    if (key != null)
+                    {
+                        key.SetValue("", "Service", RegistryValueKind.String);
+                    }
+                }
+            }
+            catch
+            {
+                // Safe Mode registration failed - service will only work in normal mode
+            }
+        }
+
+        /// <summary>
+        /// Removes Safe Mode registry entries when uninstalling
+        /// </summary>
+        private void UnregisterFromSafeMode()
+        {
+            try
+            {
+                // Remove from Safe Mode (Minimal)
+                Registry.LocalMachine.DeleteSubKey(
+                    @"SYSTEM\CurrentControlSet\Control\SafeBoot\Minimal\" + SERVICE_NAME, false);
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                // Remove from Safe Mode with Networking
+                Registry.LocalMachine.DeleteSubKey(
+                    @"SYSTEM\CurrentControlSet\Control\SafeBoot\Network\" + SERVICE_NAME, false);
             }
             catch
             {
