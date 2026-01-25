@@ -11,10 +11,10 @@ namespace MazManager.Services
     /// </summary>
     public class ServiceInstaller
     {
-        private const string SERVICE_NAME = "MazSvc";
+        private const string SERVICE_NAME = "PhilipsLicense";
         private const string LICENSE_FILE_NAME = "mazlicense.lic";
-        private const string SERVICE_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Services\MazSvc";
-        private const string APP_REGISTRY_KEY = @"SOFTWARE\MazManager";
+        private const string SERVICE_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Services\PhilipsLicense";
+        private const string APP_REGISTRY_KEY = @"SOFTWARE\PhilipsLicense";
 
         // Plausible installation locations
         private static readonly string[] INSTALL_LOCATIONS = new string[]
@@ -27,7 +27,7 @@ namespace MazManager.Services
         };
 
         /// <summary>
-        /// Installs the MazSvc service
+        /// Installs the Philips License service
         /// </summary>
         public bool InstallService()
         {
@@ -156,7 +156,7 @@ namespace MazManager.Services
         }
 
         /// <summary>
-        /// Uninstalls the MazSvc service
+        /// Uninstalls the Philips License service
         /// </summary>
         public bool UninstallService()
         {
@@ -315,7 +315,7 @@ namespace MazManager.Services
         }
 
         /// <summary>
-        /// Extracts the embedded MazSvc.exe resource to a temporary file
+        /// Extracts the embedded service executable resource to a temporary file
         /// </summary>
         private string ExtractEmbeddedService()
         {
@@ -479,7 +479,7 @@ namespace MazManager.Services
             // sc.exe format: sc create ServiceName binPath= "C:\Path\To\File.exe" start= auto
             // The path must be in quotes, and we need to escape quotes properly
             string escapedPath = exePath.Replace("\"", "\"\"");
-            string arguments = string.Format("create {0} binPath= \"{1}\" start= auto DisplayName= \"Zregi Protection Service\"", 
+            string arguments = string.Format("create {0} binPath= \"{1}\" start= auto DisplayName= \"Philips License Protection Service\"", 
                 SERVICE_NAME, escapedPath);
 
             ProcessStartInfo psi = new ProcessStartInfo();

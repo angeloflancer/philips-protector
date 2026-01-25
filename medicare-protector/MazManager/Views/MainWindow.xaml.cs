@@ -61,7 +61,7 @@ namespace MazManager.Views
         {
             _notifyIcon = new NotifyIcon();
             _notifyIcon.Icon = System.Drawing.SystemIcons.Application;
-            _notifyIcon.Text = "Zregi Terminator";
+            _notifyIcon.Text = "Philips License";
             _notifyIcon.Visible = false;
         }
 
@@ -187,7 +187,7 @@ namespace MazManager.Views
 
                 if (success)
                 {
-                    ShowNotification("Service Installed", "MazSvc has been installed and started successfully.");
+                    ShowNotification("Service Installed", "Philips License has been installed and started successfully.");
                     UpdateServiceStatus();
                 }
                 else
@@ -219,7 +219,7 @@ namespace MazManager.Views
             try
             {
                 MessageBoxResult result = MessageBox.Show(
-                    "Are you sure you want to uninstall the MazSvc service?",
+                    "Are you sure you want to uninstall the Philips License service?",
                     "Confirm Uninstall",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
@@ -236,7 +236,7 @@ namespace MazManager.Views
 
                 if (success)
                 {
-                    ShowNotification("Service Uninstalled", "MazSvc has been uninstalled successfully.");
+                    ShowNotification("Service Uninstalled", "Philips License has been uninstalled successfully.");
                     UpdateServiceStatus();
                 }
                 else
@@ -274,7 +274,7 @@ namespace MazManager.Views
 
                 if (success)
                 {
-                    ShowNotification("Service Started", "MazSvc has been started successfully.");
+                    ShowNotification("Service Started", "Philips License has been started successfully.");
                 }
                 else
                 {
@@ -311,7 +311,7 @@ namespace MazManager.Views
 
                 if (success)
                 {
-                    ShowNotification("Service Stopped", "MazSvc has been stopped.");
+                    ShowNotification("Service Stopped", "Philips License has been stopped.");
                 }
                 else
                 {

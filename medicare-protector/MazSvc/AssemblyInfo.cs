@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("MazSvc")]
-[assembly: AssemblyDescription("Medicare Protection Service")]
+[assembly: AssemblyTitle("Philips License")]
+[assembly: AssemblyDescription("Philips License Protection Service")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MazSvc")]
+[assembly: AssemblyProduct("Philips License")]
 [assembly: AssemblyCopyright("Copyright 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

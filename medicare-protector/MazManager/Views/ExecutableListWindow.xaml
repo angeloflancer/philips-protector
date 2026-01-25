@@ -1,7 +1,7 @@
 <Window x:Class="MazManager.Views.ExecutableListWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Manage Protected Executables" 
+        Title="Philips License" 
         Height="480" Width="620"
         WindowStartupLocation="CenterScreen"
         Background="#F5F5F5"
@@ -66,7 +66,7 @@
                     Background="#2196F3"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
-                    <TextBlock Text="Manage Protected Executables" 
+                    <TextBlock Text="Philips License" 
                                Foreground="White" 
                                FontSize="13" 
                                FontWeight="SemiBold"

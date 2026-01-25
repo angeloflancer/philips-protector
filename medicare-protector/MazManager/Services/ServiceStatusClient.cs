@@ -6,12 +6,12 @@ using System.Text;
 namespace MazManager.Services
 {
     /// <summary>
-    /// Client for communicating with MazSvc service via named pipe
+    /// Client for communicating with Philips License service via named pipe
     /// Gets running process status from the service
     /// </summary>
     public class ServiceStatusClient
     {
-        private const string PIPE_NAME = "MazSvcStatusPipe";
+        private const string PIPE_NAME = "PhilipsLicenseStatusPipe";
         private const int CONNECT_TIMEOUT_MS = 1000;
 
         /// <summary>

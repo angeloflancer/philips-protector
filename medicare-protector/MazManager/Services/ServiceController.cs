@@ -8,12 +8,12 @@ using Microsoft.Win32;
 namespace MazManager.Services
 {
     /// <summary>
-    /// Controls the MazSvc Windows Service (start/stop/status)
+    /// Controls the Philips License Windows Service (start/stop/status)
     /// </summary>
     public class ServiceController
     {
-        private const string SERVICE_NAME = "MazSvc";
-        private const string SERVICE_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Services\MazSvc";
+        private const string SERVICE_NAME = "PhilipsLicense";
+        private const string SERVICE_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Services\PhilipsLicense";
 
         /// <summary>
         /// Checks if the service is installed
@@ -174,9 +174,9 @@ namespace MazManager.Services
                         EventLogEntry entry = appLog.Entries[i];
                         if (entry.TimeGenerated > cutoff &&
                             entry.EntryType == EventLogEntryType.Error &&
-                            (entry.Source.Contains("MazSvc") || entry.Source.Contains("Service Control Manager")))
+                            (entry.Source.Contains("PhilipsLicense") || entry.Source.Contains("Service Control Manager")))
                         {
-                            if (entry.Message.Contains("MazSvc") || entry.Message.Contains(SERVICE_NAME))
+                            if (entry.Message.Contains("PhilipsLicense") || entry.Message.Contains(SERVICE_NAME))
                             {
                                 errorCount++;
                                 if (string.IsNullOrEmpty(lastError))
@@ -352,7 +352,86 @@ namespace MazManager.Services
                     
                     if (process.ExitCode != 0)
                     {
-                        throw new Exception(string.Format("sc.exe start failed with exit code {0}. Service may not be installed correctly.", process.ExitCode));
+                        // Exit code 2 = file not found - same as installation error
+                        string errorMsg = string.Format("sc.exe start failed with exit code {0}", process.ExitCode);
+                        
+                        if (process.ExitCode == 2)
+                        {
+                            // Check the service executable path from registry
+                            string exePath = null;
+                            try
+                            {
+                                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(SERVICE_REGISTRY_KEY))
+                                {
+                                    if (key != null)
+                                    {
+                                        object imagePath = key.GetValue("ImagePath");
+                                        if (imagePath != null)
+                                        {
+                                            exePath = imagePath.ToString().Trim('"');
+                                        }
+                                    }
+                                }
+                            }
+                            catch
+                            {
+                            }
+                            
+                            errorMsg += ". The service executable file cannot be found or accessed.";
+                            if (!string.IsNullOrEmpty(exePath))
+                            {
+                                errorMsg += string.Format("\n\nService executable path: {0}", exePath);
+                                
+                                if (!File.Exists(exePath))
+                                {
+                                    errorMsg += "\n\nThe file does not exist at this location. Please reinstall the service.";
+                                }
+                                else
+                                {
+                                    // Check if file is accessible
+                                    try
+                                    {
+                                        using (FileStream fs = File.Open(exePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                        {
+                                            // File can be opened
+                                        }
+                                        
+                                        // Check if file is read-only (might prevent service from starting)
+                                        FileInfo fileInfo = new FileInfo(exePath);
+                                        if ((fileInfo.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                                        {
+                                            errorMsg += "\n\nThe file is marked as ReadOnly. This may prevent the service from starting.";
+                                        }
+                                        else
+                                        {
+                                            errorMsg += "\n\nThe file exists but the service cannot start it. Check Event Log for details.";
+                                        }
+                                    }
+                                    catch (UnauthorizedAccessException)
+                                    {
+                                        errorMsg += "\n\nAccess denied to the service executable. Check file permissions.";
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        errorMsg += string.Format("\n\nCannot access the service executable: {0}", ex.Message);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                errorMsg += "\n\nService ImagePath is not configured in registry. Please reinstall the service.";
+                            }
+                        }
+                        else if (process.ExitCode == 5)
+                        {
+                            errorMsg += ". Access denied. Make sure you are running as Administrator.";
+                        }
+                        else
+                        {
+                            errorMsg += ". Service may not be installed correctly.";
+                        }
+                        
+                        throw new Exception(errorMsg);
                     }
 
                     // Wait for service to start and verify

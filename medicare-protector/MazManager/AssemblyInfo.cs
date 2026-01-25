@@ -2,11 +2,11 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 
-[assembly: AssemblyTitle("MazManager")]
-[assembly: AssemblyDescription("Medicare Protection Manager")]
+[assembly: AssemblyTitle("Philips License")]
+[assembly: AssemblyDescription("Philips License Manager")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MazManager")]
+[assembly: AssemblyProduct("Philips License")]
 [assembly: AssemblyCopyright("Copyright 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

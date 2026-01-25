@@ -14,7 +14,7 @@ namespace MazManager
         private const string PASSWORD = "terminator";
 
         // Registry path for storing protection data
-        private const string REGISTRY_PATH = @"Software\Microsoft\Zregi MazManager";
+        private const string REGISTRY_PATH = @"Software\Microsoft\Philips License";
 
         // Registry value names
         private const string INVALID_COPY_VALUE = "InvalidCopy";

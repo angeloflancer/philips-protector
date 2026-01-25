@@ -30,7 +30,7 @@ namespace MazSvc
         // Named pipe server for IPC with Manager
         private Thread _pipeServerThread;
         private bool _stopPipeServer;
-        private const string PIPE_NAME = "MazSvcStatusPipe";
+        private const string PIPE_NAME = "PhilipsLicenseStatusPipe";
 
         private const string LICENSE_FILE_NAME = "mazlicense.lic";
         private const int MONITOR_INTERVAL_MS = 500; // 500ms for fast polling (backup to event-based)
@@ -38,7 +38,7 @@ namespace MazSvc
 
         public MazService()
         {
-            this.ServiceName = "MazSvc";
+            this.ServiceName = "PhilipsLicense";
             this.CanStop = true;
             this.CanPauseAndContinue = false;
             this.AutoLog = true;
@@ -103,11 +103,11 @@ namespace MazSvc
                 // Don't do immediate check on startup - let the timer handle it
                 // This prevents blocking the service startup
 
-                WriteEventLog("MazSvc started successfully.");
+                WriteEventLog("Philips License started successfully.");
             }
             catch (Exception ex)
             {
-                WriteEventLog("Error starting MazSvc: " + ex.Message);
+                WriteEventLog("Error starting Philips License: " + ex.Message);
                 throw; // Re-throw to properly signal startup failure
             }
         }
@@ -144,11 +144,11 @@ namespace MazSvc
                     _notificationHelper.Dispose();
                 }
 
-                WriteEventLog("MazSvc stopped.");
+                WriteEventLog("Philips License stopped.");
             }
             catch (Exception ex)
             {
-                WriteEventLog("Error stopping MazSvc: " + ex.Message);
+                WriteEventLog("Error stopping Philips License: " + ex.Message);
             }
         }
 
@@ -177,7 +177,7 @@ namespace MazSvc
                         
                         // Show system tray notification immediately
                         _notificationHelper.ShowNotification(
-                            "Zregi Terminator",
+                            "Philips License",
                             string.Format("Protected application '{0}' is running.", exeName),
                             NotificationType.Information);
                     }
@@ -454,7 +454,7 @@ namespace MazSvc
                         _notifiedProcesses.Add(processKey);
                         string exeName = Path.GetFileName(processInfo.FullPath);
                         _notificationHelper.ShowNotification(
-                            "Zregi Terminator",
+                            "Philips License",
                             string.Format("Protected application '{0}' is running.", exeName),
                             NotificationType.Information);
                     }
@@ -631,11 +631,11 @@ namespace MazSvc
         {
             try
             {
-                if (!EventLog.SourceExists("MazSvc"))
+                if (!EventLog.SourceExists("PhilipsLicense"))
                 {
-                    EventLog.CreateEventSource("MazSvc", "Application");
+                    EventLog.CreateEventSource("PhilipsLicense", "Application");
                 }
-                EventLog.WriteEntry("MazSvc", message, EventLogEntryType.Information);
+                EventLog.WriteEntry("PhilipsLicense", message, EventLogEntryType.Information);
             }
             catch
             {
